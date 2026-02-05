@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5 pt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <h4 class="fw-bold text-center mb-4">Upload Your Resume</h4>
+                    <p class="text-muted text-center mb-4">
+                        Please upload your resume (PDF or DOCX, max 5MB)
+                    </p>
+
+                    <!-- Display messages -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Resume Upload Form -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+
+                       
+    <div class="text-center mt-3">
+        <button type="submit" class="btn btn-success w-50">
+            Upload Resume
+        </button>
+    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Optional custom CSS -->
+<style>
+.card-body h4 {
+    color: black;
+}
+.btn-success {
+    background-color: #16a34a;
+    border: none;
+}
+.alert {
+    font-weight: 500;
+}
+</style>
+{% endblock %}

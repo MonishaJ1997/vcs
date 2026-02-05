@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Job Listing Header -->
+<div class="container mt-5 pt-5"> <!-- mt-5 + pt-5 for fixed navbar spacing -->
+    <h2 class="text-center mb-4 fw-bold">Job Listings</h2>
+
+    <div class="row g-4">
+        {% for job in jobs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="job-card shadow-sm p-3 rounded h-100 d-flex flex-column justify-content-between">
+                
+                <!-- Job Info -->
+                <div class="job-info mb-3">
+                    <h5 class="fw-bold">{{ job.title }}</h5>
+                    <p class="text-muted mb-1">{{ job.company }}</p>
+                    <p class="text-secondary mb-0">{{ job.location }} • {{ job.experience }}</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                  <!---- <button class="btn btn-success btn-sm apply-btn">Apply</button>-->
+
+
+<a href="{% url 'jobs:apply_job' job.id %}" class="btn btn-success btn-sm">
+    Apply
+</a>
+
+
+                    <button class="btn btn-outline-primary btn-sm save-job-btn" data-job="{{ job.id }}">
+                        {% if job.id in saved_jobs %}
+                            <i class="bi bi-bookmark-fill"></i>
+                        {% else %}
+                            <i class="bi bi-bookmark"></i>
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted">No jobs available.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% if jobs.has_other_pages %}
+<div class="d-flex justify-content-center mt-5">
+  <nav>
+    <ul class="pagination">
+
+      <!-- Previous -->
+      {% if jobs.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ jobs.previous_page_number }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Previous</span>
+        </li>
+      {% endif %}
+
+      <!-- Page numbers -->
+      {% for num in jobs.paginator.page_range %}
+        {% if jobs.number == num %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      <!-- Next -->
+      {% if jobs.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ jobs.next_page_number }}">Next</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">Next</span>
+        </li>
+      {% endif %}
+
+    </ul>
+  </nav>
+</div>
+{% endif %}
+
+<!-- jQuery AJAX Save Job -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).on('click', '.save-job-btn', function () {
+    let btn = $(this);
+    let job_id = btn.data('job');
+
+    $.ajax({
+        url: "{% url 'jobs:save_job' %}",
+        type: "POST",
+        data: {
+            job_id: job_id,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (response) {
+            if (response.status === 'saved') {
+                btn.html('<i class="bi bi-bookmark-fill"></i>');
+            } 
+            else if (response.status === 'unsaved') {
+                btn.html('<i class="bi bi-bookmark"></i>');
+            }
+        },
+        error: function () {
+            alert("Something went wrong. Please try again.");
+        }
+    });
+});
+</script>
+
+
+<!-- Custom CSS -->
+<style>
+/* Fixed Navbar Padding */
+body {
+    padding-top: 70px; /* adjust to your navbar height */
+}
+
+/* Job Card Styling */
+.job-card {
+    background-color: #fff;
+    border: 1px solid #e3e3e3;
+    transition: all 0.3s ease;
+}
+.job-card:hover {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+}
+
+/* Job Title & Info */
+.job-info h5 {
+    font-size: 1.1rem;
+    color: #1a1a1a;
+}
+.job-info p {
+    font-size: 0.875rem;
+}
+
+/* Buttons */
+.apply-btn {
+    min-width: 70px;
+}
+.save-job-btn {
+    width: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+    .job-card {
+        flex-direction: column;
+        text-align: left;
+    }
+    .d-flex.justify-content-between {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+</style>
+
+{% endblock %}

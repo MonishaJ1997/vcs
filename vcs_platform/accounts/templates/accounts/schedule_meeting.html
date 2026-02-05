@@ -1,0 +1,128 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Vetri Consultancy Services</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+
+
+<style>
+    .card {
+    border-radius: 14px;
+}
+
+.card-header {
+    font-size: 18px;
+}
+
+form p {
+    margin-bottom: 15px;
+}
+
+form input,
+form select,
+form textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #dcdcdc;
+}
+
+form input:focus,
+form textarea:focus,
+form select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 0.15rem rgba(37, 99, 235, 0.25);
+}
+</style>
+  </head>
+
+<body>
+
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark  fixed-top" style="background-color: #2563eb;">
+  <div class="container">
+
+    <!-- Brand -->
+    <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
+      VCS <span class="fw-normal small">– Vetri Consultancy Services</span>
+    </a>
+
+    <!-- Mobile toggle -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vcsNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="vcsNav">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+
+     
+
+
+        <!-- 🔓 LOGOUT -->
+        <li class="nav-item ms-lg-2">
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn  btn-sm" style="background-color: green; color: white;">Logout</button>
+          </form>
+        </li>
+</ul>
+    </div>
+  </div>
+</nav>
+
+
+{% block content %}
+<div class="container-fluid mt-5 pt-5 pb-5 mb-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-12">
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-success text-white fw-semibold">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    Schedule Meeting
+                    {% if application %}
+                        <span class="fw-normal"> - {{ application.full_name }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            {{ form.as_p }}
+                        </div>
+
+                        <div class="d-flex justify-content-between flex-wrap gap-2">
+                            <a href="{% url 'consultant_dashboard' %}" class="btn btn-outline-secondary">
+                                Back
+                            </a>
+
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="bi bi-check-circle me-1"></i>
+                                Save Meeting
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

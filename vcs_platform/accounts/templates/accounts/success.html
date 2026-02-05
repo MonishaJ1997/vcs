@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="success-wrapper">
+  <div class="success-card">
+
+    <!-- ICON -->
+    <div class="success-icon">
+      ✓
+    </div>
+
+    <!-- CONTENT -->
+    <h2>Payment Successful</h2>
+    <p class="sub-text">
+      Your <strong>Pro Subscription</strong> is now active.
+    </p>
+
+    <div class="success-details">
+      <p><strong>Plan:</strong> Pro Plan</p>
+      <p><strong>Amount Paid:</strong> ₹ 1999</p>
+      <p><strong>Status:</strong> Active</p>
+    </div>
+
+    <!-- BUTTON -->
+    <a href="#" class="success-btn">
+  Download Invoice
+</a>
+
+
+  </div>
+</section>
+
+<style>
+
+/* PAGE */
+.success-wrapper {
+    min-height: 100vh;
+    background: #e9f2ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 90px;
+}
+
+/* CARD */
+.success-card {
+    background: #ffffff;
+    width: 420px;
+    border-radius: 18px;
+    padding: 40px 30px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.18);
+}
+
+/* ICON */
+.success-icon {
+    width: 70px;
+    height: 70px;
+    background: #1f8a70;
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+}
+
+/* TEXT */
+.success-card h2 {
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.sub-text {
+    font-size: 15px;
+    color: #555;
+}
+
+/* DETAILS */
+.success-details {
+    margin: 25px 0;
+    background: #f3f8ff;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: left;
+}
+
+.success-details p {
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+/* BUTTON */
+.success-btn {
+    display: inline-block;
+    background: #1f8a70;
+    color: white;
+    padding: 12px 34px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.success-btn:hover {
+    background: #218838;
+    color: white;
+}
+
+</style>
+
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% csrf_token %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="fw-bold text-center mb-4">AI Career Chatbot</h3>
+
+                    <!-- Chat Box -->
+                    <div id="chat-box" class="border rounded p-3 mb-3" style="height:350px; overflow-y:auto; background:#f9f9f9;">
+                        <!-- Messages will appear here -->
+                    </div>
+
+                    <!-- Input -->
+<div class="input-group mb-2">
+    <input type="file" id="resume-upload" class="form-control" accept=".pdf,.docx"/>
+    <button class="btn btn-primary" id="upload-resume">Upload Resume</button>
+</div>
+
+
+
+
+
+                    <div class="input-group">
+                        <input type="text" id="chat-input" class="form-control" placeholder="Type your question..." />
+                        <button class="btn btn-success" id="chat-send">Send</button>
+                    </div>
+
+                    <!-- Error -->
+                    <div id="chat-error" class="text-danger mt-2"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!----
+<script>
+const sendBtn = document.getElementById('chat-send');
+const chatInput = document.getElementById('chat-input');
+const chatBox = document.getElementById('chat-box');
+const chatError = document.getElementById('chat-error');
+
+sendBtn.addEventListener('click', async () => {
+    const question = chatInput.value.trim();
+    if (!question) return;
+
+    // Show user message
+    const userMsg = document.createElement('div');
+    userMsg.className = 'text-end mb-2';
+    userMsg.innerHTML = `<strong>You:</strong> ${question}`;
+    chatBox.appendChild(userMsg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    chatInput.value = '';
+    chatError.textContent = '';
+
+    try {
+        const response = await fetch("{% url 'chatbot-ask' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ question })
+        });
+
+        if (response.status === 401) {
+            chatError.textContent = "You must be logged in to use the chatbot. Please log in first.";
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error('Failed to send question');
+        }
+
+        const data = await response.json();
+
+        const botMsg = document.createElement('div');
+        botMsg.className = 'text-start mb-2';
+        botMsg.innerHTML = `<strong>Chatbot:</strong> ${data.answer}`;
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+    } catch (err) {
+        chatError.textContent = "Failed to send question. Please try again.";
+        console.error(err);
+    }
+});
+</script>-->
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // DOM elements
+    const sendBtn = document.getElementById('chat-send');
+    const chatInput = document.getElementById('chat-input');
+    const chatBox = document.getElementById('chat-box');
+    const chatError = document.getElementById('chat-error');
+
+    const uploadBtn = document.getElementById('upload-resume');
+    const resumeInput = document.getElementById('resume-upload');
+
+    // CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // CHAT SEND
+    sendBtn.addEventListener('click', async () => {
+        const question = chatInput.value.trim();
+        if (!question) return;
+
+        // Show user message
+        const userMsg = document.createElement('div');
+        userMsg.className = 'text-end mb-2';
+        userMsg.innerHTML = `<strong>You:</strong> ${question}`;
+        chatBox.appendChild(userMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        chatInput.value = '';
+        chatError.textContent = '';
+
+        try {
+            const response = await fetch("{% url 'chatbot-ask' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken
+                },
+                body: JSON.stringify({ question })
+            });
+
+            if (!response.ok) throw new Error("Failed to send question");
+
+            const data = await response.json();
+
+            const botMsg = document.createElement('div');
+            botMsg.className = 'text-start mb-2';
+            botMsg.innerHTML = `<strong>Chatbot:</strong> ${data.answer}`;
+            chatBox.appendChild(botMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (err) {
+            chatError.textContent = "Failed to send question. Please try again.";
+            console.error(err);
+        }
+    });
+
+    // RESUME UPLOAD
+    uploadBtn.addEventListener('click', async () => {
+        const file = resumeInput.files[0];
+        if (!file) {
+            alert("Please select a file to upload.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('resume', file);
+
+        try {
+            const response = await fetch("{% url 'chatbot-upload-resume' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.status === 403) {
+                alert(data.message); // Free user -> Upgrade to Pro
+                return;
+            }
+
+            const botMsg = document.createElement('div');
+            botMsg.className = 'text-start mb-2';
+            botMsg.innerHTML = `<strong>Chatbot:</strong> ${data.message}`;
+            chatBox.appendChild(botMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (err) {
+            console.error(err);
+            alert("Error uploading resume. Try again.");
+        }
+    });
+
+});
+</script>
+
+
+<style>
+#chat-box div {
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+#chat-box .text-end {
+    background-color: #d1e7dd; /* User */
+}
+#chat-box .text-start {
+    background-color: #f8d7da; /* Bot */
+}
+</style>
+{% endblock %}

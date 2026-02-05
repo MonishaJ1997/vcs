@@ -1,0 +1,26 @@
+<h3 class="mb-4">Choose Resume Template</h3>
+
+<div class="row">
+  {% for template in templates %}
+  <div class="col-md-4">
+    <div class="card shadow-sm mb-4">
+      <img src="{{ template.preview_image.url }}" class="card-img-top">
+
+      <div class="card-body text-center">
+        <h6>{{ template.name }}</h6>
+
+        {% if template.is_premium and user_plan == "FREE" %}
+          <a href="{% url 'accounts:plan' %}" class="btn btn-warning btn-sm">
+            Upgrade to Use
+          </a>
+        {% else %}
+          <a href="{% url 'resumes:create_resume' template.id %}"
+             class="btn btn-primary btn-sm">
+            Use Template
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>

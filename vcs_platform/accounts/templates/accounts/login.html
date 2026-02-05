@@ -1,0 +1,105 @@
+
+  {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<!-- Login Page Container --
+<div class="container">
+  <div class="row justify-content-center align-items-center" style="height: 80vh;">
+    <div class="col-md-5">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+          <!-- Card Title --
+          <h3 class="card-title text-center mb-4 fw-bold">Login to VCS</h3>
+
+          <!-- Login Form --
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+
+            <div class="d-grid mt-3">
+              <button type="submit" class="btn btn-success btn-block">Login</button>
+            </div>
+          </form>
+
+          <!-- Extra Links --
+          <div class="mt-3 text-center">
+            <small>Don't have an account? <a href="{% url 'register' %}">Sign up</a></small>
+          </div>
+          <div class="mt-1 text-center">
+            <small><a href="{% url 'password_reset' %}">Forgot password?</a></small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Optional Custom Styles -->
+
+
+
+<div class="container mt-5 pt-5">
+  <div class="row justify-content-center align-items-center" style="min-height: calc(100vh - 150px);">
+    <div class="col-md-5">
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+
+          <h3 class="card-title text-center mb-4 fw-bold">Login to VCS</h3>
+
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+
+            <div class="d-grid mt-3">
+              <button type="submit" class="btn btn-success">Login</button>
+            </div>
+          </form>
+
+          <div class="mt-3 text-center">
+            <small>Don't have an account?
+              <a href="{% url 'register' %}">Sign up</a>
+            </small>
+          </div>
+
+          <div class="mt-1 text-center">
+            <small>
+              <a href="{% url 'password_reset' %}">Forgot password?</a>
+            </small>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<style>
+ 
+
+  .card {
+    border-radius: 1rem;
+    
+    
+  }
+
+  .card-title {
+    color: #19416d;
+  }
+
+  input.form-control {
+    border-radius: 0.5rem;
+  }
+
+  button.btn-success {
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+ 
+
+
+</style>
+
+{% endblock %}

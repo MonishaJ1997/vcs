@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="plan-section">
+  <div class="container d-flex justify-content-center">
+
+    <div class="plan-card">
+
+      <!-- Header -->
+      <div class="plan-header">
+        <h2>{{ plan.title }}</h2>
+        <p>{{ plan.description }}</p>
+      </div>
+
+      <!-- Body -->
+      <div class="plan-body">
+
+        <ul class="plan-features">
+          {% for feature in plan.features.all %}
+            <li>{{ feature.text }}</li>
+          {% endfor %}
+        </ul>
+
+        <!-- Button -->
+        <a href="/accounts/payment" class="plan-btn">
+          Upgrade
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+
+<style>
+
+/* Section */
+.plan-section {
+    background: #e9f2ff;
+    min-height: 100vh;
+    padding-top: 120px;
+    padding-bottom: 60px;
+    display: flex;
+    align-items: flex-start;
+}
+
+/* Card */
+.plan-card {
+    background: #2563eb;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    overflow: hidden;
+    width: 500px;
+    color: white;
+}
+
+/* Header */
+.plan-header {
+    background: white;
+    color: black;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.plan-header h2 {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.plan-header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Body */
+.plan-body {
+    padding: 30px 25px;
+}
+
+/* Features */
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 30px;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 15px;
+    color: white;
+    text-align: left;
+}
+
+/* GREEN ROUND TICK */
+.plan-features li::before {
+    content: "✓";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #1f8a70;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Button */
+.plan-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    background: green;
+    color: #fff;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.plan-btn:hover {
+   
+    color: #fff;
+}
+
+</style>
+
+{% endblock %}

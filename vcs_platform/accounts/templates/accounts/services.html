@@ -1,0 +1,155 @@
+
+
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="plan-page py-5" style="background: #e9f2ff;">
+  <div class="container">
+    <div class="row justify-content-center">
+
+      <!-- Pro Plan Card -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-primary">
+          <div class="card-header text-center bg-primary text-white">
+            <h2 class="mb-0">{{ plan.title }}</h2>
+          </div>
+          <div class="card-body text-center">
+            <p class="lead">{{ plan.description }}</p>
+
+            <!-- Features -->
+            <ul class="list-group list-group-flush mt-4 mb-4">
+              {% for feature in plan.features.all %}
+              <li class="list-group-item">
+                <i class="bi bi-check-circle-fill text-primary me-2"></i>
+                {{ feature.text }}
+              </li>
+              {% endfor %}
+            </ul>
+
+            <!-- Subscribe Button -->
+            <a href="#" class="btn btn-primary btn-lg w-50">Subscribe Now</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+<style>
+    
+/* Section */
+.plan-section {
+              /* FULL green background */
+    min-height: 100vh;
+    padding-top: 100px;           /* space for fixed navbar */
+    padding-bottom: 60px;
+    display: flex;
+    align-items: flex-start;      /* prevent vertical cut */
+}
+
+/* Card */
+.plan-card {
+    background: #ffffff;
+    background: #19416d;  
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    overflow: hidden;
+    width: 500px;
+    color: white;
+}
+
+/* Header */
+.plan-header {
+    background: #1f8a70;          /* darker green */
+    color: #fff;
+    padding: 30px 20px;
+    text-align: center;
+}
+
+.plan-header h2 {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.plan-header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Body */
+.plan-body {
+    padding: 30px 25px;
+}
+
+
+/* Features 
+.plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0 30px;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 15px;
+    color: white;
+    text-align: left;            
+}*/
+.plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    font-size: 15px;
+    color: white;
+    text-align: left;
+}
+
+/* GREEN ROUND TICK */
+.plan-features li::before {
+    content: "✓";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #1f8a70;   /* green background */
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Button */
+.plan-btn {
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+    background: #1f8a70;
+    color: #fff;
+    padding: 12px 40px;
+    border-radius: 30px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.plan-btn:hover {
+    background: #218838;
+    color: #fff;
+}
+
+
+
+
+</style>
+{% endblock %}
+
+
+

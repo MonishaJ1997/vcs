@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<section class="auth-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-xl-5 col-lg-6 col-md-8">
+
+        <div class="auth-card">
+          <div class="auth-card-body">
+
+            <h1 class="auth-title">Create your  account</h1>
+            <p class="auth-subtitle">
+              Join thousands of professionals finding better careers
+            </p>
+
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {{ form|crispy }}
+
+              <button type="submit" class="btn btn-success w-100 btn-lg mt-3">
+                Create Account
+              </button>
+            </form>
+
+            <div class="auth-footer">
+              Already have an account?
+              <a href="{% url 'login' %}">Login</a>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+
+  /* Fix navbar overlap globally */
+body {
+  padding-top: 90px;
+}
+
+/* Page background */
+.auth-section {
+  min-height: calc(100vh - 90px);
+  display: flex;
+  align-items: center;
+ /* background: linear-gradient(120deg, #f0f4f8, #e6ecf3);*/
+ 
+}
+
+/* Card */
+.auth-card {
+  background: #e6f2ff;
+  border-radius: 18px;
+  box-shadow:
+    0 10px 25px rgba(0, 0, 0, 0.08),
+    0 5px 10px rgba(0, 0, 0, 0.05);
+  animation: slideUp 0.6s ease;
+}
+
+/* Card padding */
+.auth-card-body {
+  padding: 3rem;
+}
+
+/* Title */
+.auth-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.3rem;
+  color: #212529;
+}
+
+/* Subtitle */
+.auth-subtitle {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin-bottom: 2rem;
+}
+
+/* Inputs */
+input.form-control,
+select.form-select {
+  height: 48px;
+  border-radius: 10px;
+}
+
+/* Focus */
+input.form-control:focus,
+select.form-select:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.18rem rgba(40, 167, 69, 0.25);
+}
+
+/* Button */
+.btn-success {
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+/* Footer */
+.auth-footer {
+  margin-top: 1.8rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.auth-footer a {
+  color: #28a745;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Animation */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+</style>
+{% endblock %}

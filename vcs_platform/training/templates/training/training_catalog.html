@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5 mt-5">
+  <h2 class="text-center fw-bold mb-2">Our IT Trainings</h2>
+  <p class="text-center text-muted mb-5">Choose the best course to grow professionally</p>
+
+  <div class="row g-4">
+    {% for course in courses %}
+    <div class="col-md-4">
+      <div class="card training-card h-100 shadow-sm">
+        <div class="training-badge">
+          {% for f in course.feature_list %}
+            <span>✅ {{ f }}</span><br>
+          {% endfor %}
+        </div>
+
+        <img src="{{ course.image.url }}" class="card-img-top" alt="course">
+
+        <div class="card-body text-center">
+          <h5 class="fw-bold">{{ course.title }}</h5>
+          <p class="text-success fw-semibold">⏱ {{ course.duration_days }} Days</p>
+          <h4 class="fw-bold text-dark">₹ {{ course.price }}</h4>
+
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            {% if course.brochure %}
+              <a href="{{ course.brochure.url }}" class="btn btn-outline-success btn-sm">Download Brochure</a>
+            {% endif %}
+
+            {% if is_pro %}
+              <button class="btn btn-success btn-sm enroll-btn" data-id="{{ course.id }}">Enroll Now</button>
+            {% else %}
+              <button class="btn btn-success btn-sm" disabled>Enroll Now (Pro Only)</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const csrftoken = document.cookie.split('; ').find(row => row.startsWith('csrftoken')).split('=')[1];
+
+  document.querySelectorAll('.enroll-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const courseId = btn.dataset.id;
+      try {
+        const response = await fetch(`/training/enroll/${courseId}/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken }
+        });
+        const data = await response.json();
+        alert(data.message);
+      } catch(err) {
+        console.error(err);
+        alert("Error enrolling. Try again.");
+      }
+    });
+  });
+});
+</script>
+
+<style>
+.training-card {
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  transition: 0.3s ease;
+}
+.training-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+}
+.training-badge {
+  background: #dcfce7;
+  color: #065f46;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.training-card img {
+  height: 210px;
+  width: 100%;
+  object-fit: cover;
+}
+.btn-success {
+  background-color: #16a34a;
+  border: none;
+  border-radius: 8px;
+}
+.btn-outline-success {
+  border: 2px solid #16a34a;
+  color: #16a34a;
+  border-radius: 8px;
+}
+.btn-outline-success:hover {
+  background: #16a34a;
+  color: #fff;
+}
+</style>
+{% endblock %}

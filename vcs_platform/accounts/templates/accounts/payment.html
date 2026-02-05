@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<section class="payment-wrapper">
+  <div class="payment-container">
+
+    <!-- LEFT : ORDER SUMMARY -->
+    <div class="order-summary">
+      <h3>Order Summary</h3>
+
+      <div class="plan-box">
+        <h4>{{ plan.title }}</h4>
+        <p>{{ plan.description }}</p>
+
+        <ul>
+          {% for feature in plan.features.all %}
+          <li>✔ {{ feature.text }}</li>
+          {% endfor %}
+        </ul>
+
+        <div class="price">
+          ₹ {{ plan.price }}
+          <span>/ one time</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT : PAYMENT -->
+    <div class="payment-box">
+      <h3>Payment Details</h3>
+
+      <form method="post" id="paymentForm">
+  {% csrf_token %}
+
+  <label>Card Holder Name</label>
+  <input type="text" name="card_name" placeholder="Enter name on card" required>
+
+  <label>Card Number</label>
+  <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
+
+  <div class="row">
+    <div>
+      <label>Expiry</label>
+      <input type="text" name="expiry" placeholder="MM/YY" required>
+    </div>
+    <div>
+      <label>CVV</label>
+      <input type="password" name="cvv" placeholder="***" required>
+    </div>
+  </div>
+
+        <!-- PAYMENT ICONS -->
+        <div class="payment-icons">
+          <img src="https://img.icons8.com/color/48/visa.png"/>
+          <img src="https://img.icons8.com/color/48/mastercard.png"/>
+          <img src="https://img.icons8.com/color/48/google-pay.png"/>
+          <img src="https://img.icons8.com/color/48/paytm.png"/>
+        </div>
+
+        <button type="submit" class="pay-btn">
+          Pay ₹ {{ plan.price }}
+        </button>
+      </form>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+document.getElementById("paymentForm").addEventListener("submit", function(e){
+
+    e.preventDefault(); // stop default submit
+
+    let card = document.querySelector("[name='card_number']").value.replace(/\s/g,'');
+    let cvv = document.querySelector("[name='cvv']").value;
+    let expiry = document.querySelector("[name='expiry']").value;
+
+    if(card.length !== 16 || isNaN(card)){
+        alert("Card number must be 16 digits");
+        return;
+    }
+
+    if(cvv.length !== 3 || isNaN(cvv)){
+        alert("CVV must be 3 digits");
+        return;
+    }
+
+    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)){
+        alert("Invalid expiry format MM/YY");
+        return;
+    }
+
+    // SUCCESS MESSAGE
+    alert("✅ Payment Successful!");
+
+    // If you want Django POST after validation
+    this.submit();
+});
+</script>
+
+<style>
+/* PAGE */
+.payment-wrapper {
+    min-height: 100vh;
+    background: #e9f2ff;
+    padding-top: 110px;
+}
+
+/* MAIN CONTAINER */
+.payment-container {
+    max-width: 1000px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+/* ORDER SUMMARY */
+.order-summary {
+    background: #2563eb;
+    color: white;
+    border-radius: 16px;
+    padding: 30px;
+}
+
+.order-summary h3 {
+    margin-bottom: 15px;
+}
+
+.plan-box ul {
+    padding-left: 0;
+    list-style: none;
+}
+
+.plan-box li {
+    margin-bottom: 8px;
+}
+
+.price {
+    font-size: 28px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.price span {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* PAYMENT BOX */
+.payment-box {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.payment-box h3 {
+    margin-bottom: 20px;
+}
+
+.payment-box label {
+    font-size: 14px;
+    margin-top: 12px;
+    display: block;
+}
+
+.payment-box input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    margin-top: 5px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+}
+
+.row div {
+    width: 100%;
+}
+
+/* ICONS */
+.payment-icons {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+/* PAY BUTTON */
+.pay-btn {
+    width: 100%;
+    background: #1f8a70;
+    color: white;
+    border: none;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+}
+
+.pay-btn:hover {
+    background: #218838;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .payment-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+</style>
+
+{% endblock %}

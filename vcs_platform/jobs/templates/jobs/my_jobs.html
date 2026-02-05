@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-5 pt-5">
+    <h2 class="text-center mb-4 fw-bold">My Saved Jobs</h2>
+
+    <div class="row g-4">
+        {% for job in jobs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="job-card shadow-sm p-3 rounded h-100 d-flex flex-column justify-content-between">
+
+                <div class="job-info mb-3">
+                    <h5 class="fw-bold">{{ job.title }}</h5>
+                    <p class="text-muted mb-1">{{ job.company }}</p>
+                    <p class="text-secondary mb-0">
+                        {{ job.location }} • {{ job.experience }}
+                    </p>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-auto">
+                    <!--<button class="btn btn-success btn-sm">Apply</button>-->
+
+<a href="{% url 'jobs:apply_job' job.id %}" class="btn btn-success btn-sm">
+    Apply
+</a>
+
+                </div>
+
+                 <!----  <button class="btn btn-outline-primary btn-sm save-job-btn"
+                            data-job="{{ job.id }}">
+                        <i class="bi bi-bookmark-fill"></i>
+                    </button>-->
+                </div>
+
+            
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted">You have not saved any jobs yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+<style>
+    .job-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e6ecf3;
+    transition: all 0.25s ease;
+
+    /* REAL VISIBLE SHADOW */
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.08),
+        0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.job-card:hover {
+    transform: translateY(-5px);
+    box-shadow:
+        0 18px 35px rgba(0, 0, 0, 0.12),
+        0 8px 15px rgba(0, 0, 0, 0.08);
+}
+
+</style>
+
+{% endblock %}

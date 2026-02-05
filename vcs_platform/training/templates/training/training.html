@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container py-5 mt-5">
+  <h2 class="text-center fw-bold mb-2">
+    Our IT Trainings
+  </h2>
+  <p class="text-center text-muted mb-5">
+    Choosing the best course will help you grow professionally
+  </p>
+
+  <div class="row g-4">
+    {% for course in courses %}
+    <div class="col-md-4">
+      <div class="card training-card h-100 shadow-sm">
+        
+        <div class="training-badge">
+          {% for f in course.feature_list %}
+            <span>✅ {{ f }}</span><br>
+          {% endfor %}
+        </div>
+
+        <img src="{{ course.image.url }}" class="card-img-top" alt="course">
+
+        <div class="card-body text-center">
+          <h5 class="fw-bold">{{ course.title }}</h5>
+
+          <p class="text-success fw-semibold">
+            ⏱ {{ course.duration_days }} Days
+          </p>
+
+          <h4 class="fw-bold text-dark">
+            ₹ {{ course.price }}
+          </h4>
+
+          <div class="d-flex justify-content-center gap-2 mt-3">
+            {% if course.brochure %}
+              <a href="{{ course.brochure.url }}" class="btn btn-outline-success btn-sm">
+                Download Brochure
+              </a>
+            {% endif %}
+            <a href="#" class="btn btn-success btn-sm">
+              Know More
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+<style>
+  /*
+  .training-card {
+  border-radius: 16px;
+  transition: 0.3s ease;
+}
+
+.training-card:hover {
+  transform: translateY(-6px);
+}
+
+.training-badge {
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 14px;
+  padding: 12px;
+  border-radius: 16px 16px 0 0;
+  text-align: left;
+}
+
+.training-card img {
+  height: 200px;
+  object-fit: cover;
+}
+
+.btn-success {
+  background-color: #16a34a;
+  border: none;
+}
+
+.btn-outline-success {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.btn-outline-success:hover {
+  background-color: #16a34a;
+  color: #fff;
+}
+*/
+
+/* ===== GLOBAL NAVBAR FIX ===== */
+
+/* change value based on your navbar height */
+:root {
+  --navbar-height: 90px;
+}
+
+body {
+  padding-top: var(--navbar-height);
+}
+
+/* optional: smooth layout */
+.main-content {
+  min-height: 100vh;
+}
+
+/* ===== TRAINING PAGE EXTRA POLISH ===== */
+
+.training-card {
+  border-radius: 16px;
+  overflow: hidden;
+  border: none;
+  transition: 0.3s ease;
+}
+
+.training-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+}
+
+.training-badge {
+  background: #dcfce7;
+  color: #065f46;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.training-card img {
+  height: 210px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.btn-success {
+  background-color: #16a34a;
+  border: none;
+  border-radius: 8px;
+}
+
+.btn-outline-success {
+  border: 2px solid #16a34a;
+  color: #16a34a;
+  border-radius: 8px;
+}
+
+.btn-outline-success:hover {
+  background: #16a34a;
+  color: #fff;
+}
+
+</style>
+{% endblock %}
+

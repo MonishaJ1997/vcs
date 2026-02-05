@@ -1,0 +1,143 @@
+/* Apply font to entire website */
+body {
+    font-family: 'Poppins', sans-serif;
+}
+
+
+
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+
+.navbar .nav-link.active {
+    font-weight: 800
+    
+}
+
+
+/* JOB LIST */
+.job-list {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.job-item {
+    padding: 18px 20px;
+    transition: all 0.3s ease;
+}
+
+.job-item:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+/* JOB LINK */
+.job-link {
+    text-decoration: none;
+    color: #212529;
+    display: block;
+}
+
+.job-link h5 {
+    font-weight: 600;
+}
+
+.job-link:hover h5 {
+    color: #28a745;
+}
+
+/* BADGE */
+.job-item .badge {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+/* JOB DETAIL CARD */
+.job-detail-card {
+    border-radius: 14px;
+    background-color: #ffffff;
+}
+
+/* INFO LABELS */
+.job-info-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #6c757d;
+    font-weight: 600;
+}
+
+.job-info-value {
+    font-size: 16px;
+    font-weight: 500;
+    color: #212529;
+}
+
+/* DESCRIPTION */
+.job-detail-card p {
+    line-height: 1.7;
+}
+
+/* BUTTONS */
+.job-detail-card .btn-lg {
+    padding: 10px 22px;
+    border-radius: 30px;
+}
+
+
+.vcs-footer {
+    background: #4a4a4a;
+    color: #fff;
+    padding: 50px 0 0;
+    
+}
+
+
+
+.vcs-footer h6,
+.footer-logo {
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.footer-text {
+    font-size: 14px;
+    color: #d1d1d1;
+}
+
+.vcs-footer ul {
+    list-style: none;
+    padding: 0;
+}
+
+.vcs-footer ul li {
+    margin-bottom: 8px;
+}
+
+.vcs-footer ul li a {
+    color: #d1d1d1;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.vcs-footer ul li a:hover {
+    color: #ffffff;
+}
+
+.footer-social i {
+    font-size: 18px;
+    margin-right: 12px;
+    cursor: pointer;
+}
+
+.footer-bottom {
+    border-top: 1px solid #666;
+    margin-top: 30px;
+    padding: 15px;
+    font-size: 14px;
+    color: #ccc;
+}
