@@ -17,3 +17,11 @@ class ChatMessageAdmin(admin.ModelAdmin):
     def response_preview(self, obj):
         return (obj.response[:50] + '...') if len(obj.response) > 50 else obj.response
     response_preview.short_description = 'Response'
+
+
+
+from django.contrib import admin
+from .models import CompanyInterviewQuestion, ChatConversation
+
+admin.site.register(CompanyInterviewQuestion)
+admin.site.register(ChatConversation)

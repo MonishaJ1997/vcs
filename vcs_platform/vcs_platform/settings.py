@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=8=^nw3o$cybr69%+c$_#=j#1hb5k*a4nsih_^7*tm_mv7ibe1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     
     'crispy_bootstrap4', 
      'rest_framework',
+     'django.contrib.humanize',  
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

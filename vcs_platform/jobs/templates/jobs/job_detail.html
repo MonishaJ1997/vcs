@@ -6,37 +6,71 @@
   <div class="row justify-content-center">
     <div class="col-lg-8">
 
-      <div class="card job-detail-card shadow-sm border-0">
+      <div class="card job-detail-card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
 
-          <h2 class="fw-bold mb-3">{{ job.title }}</h2>
-
-          <p class="text-muted mb-4">
-            <i class="bi bi-building"></i> {{ job.company }}
+          <!-- JOB TITLE -->
+          <h2 class="fw-bold mb-2">{{ job.title }}</h2>
+          <p class="text-muted mb-3">
+            <i class="bi bi-building me-1"></i> {{ job.company }}
           </p>
 
-          <div class="row mb-4">
-            <div class="col-md-4 mb-2">
-              <span class="job-info-label">Location</span>
-              <div class="job-info-value">{{ job.location }}</div>
-            </div>
-            <div class="col-md-4 mb-2">
-              <span class="job-info-label">Experience</span>
-              <div class="job-info-value">{{ job.experience }}</div>
-            </div>
+          <!-- JOB INFO BADGES -->
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <span class="badge bg-light text-dark">
+              <i class="bi bi-geo-alt-fill me-1"></i> {{ job.location }}
+            </span>
+            <span class="badge bg-light text-dark">
+              <i class="bi bi-clock-history me-1"></i> {{ job.experience }}
+            </span>
+            <span class="badge bg-light text-dark">
+              <i class="bi bi-calendar2-week me-1"></i>
+              {% if job.working_schedule == 'FT' %} Full Time
+              {% elif job.working_schedule == 'PT' %} Part Time
+              {% else %} Internship
+              {% endif %}
+            </span>
+            <span class="badge bg-light text-dark">
+              <i class="bi bi-house-door-fill me-1"></i>
+              {% if job.work_type == 'RM' %} Remote
+              {% elif job.work_type == 'HY' %} Hybrid
+              {% else %} Onsite
+              {% endif %}
+            </span>
+            <span class="badge bg-light text-dark">
+              
+              {% if job.salary %} {{ job.salary }} {% else %} Not Specified {% endif %}
+            </span>
           </div>
 
           <hr>
 
+          <!-- JOB DESCRIPTION -->
           <h5 class="fw-semibold mb-2">Job Description</h5>
-          <p class="text-secondary">{{ job.description }}</p>
+          <p class="text-secondary">{{ job.description|linebreaks }}</p>
 
-          <div class="mt-4 d-flex gap-3">
-            <a href="{% url 'resumes_upload' %}" class="btn btn-success btn-lg">
-              Apply / Upload Resume
+          <!-- ADDITIONAL DETAILS IF ANY (example: responsibilities/requirements) -->
+          {% if job.requirements %}
+          <h5 class="fw-semibold mt-3 mb-2">Requirements</h5>
+          <p class="text-secondary">{{ job.requirements|linebreaks }}</p>
+          {% endif %}
+
+          {% if job.responsibilities %}
+          <h5 class="fw-semibold mt-3 mb-2">Responsibilities</h5>
+          <p class="text-secondary">{{ job.responsibilities|linebreaks }}</p>
+          {% endif %}
+
+          <hr>
+
+          <!-- ACTION BUTTONS -->
+          <div class="mt-4 d-flex gap-3 flex-wrap">
+            <a href="{% url 'jobs:apply_job' job.id %}" 
+               class="btn btn-primary btn-lg rounded-pill px-4">
+               Apply Now
             </a>
-            <a href="{% url 'jobs_list' %}" class="btn btn-outline-secondary btn-lg">
-              Back to Jobs
+            <a href="{% url 'jobs:job_list' %}" 
+               class="btn btn-outline-secondary btn-lg rounded-pill px-4">
+               Back to Jobs
             </a>
           </div>
 
@@ -47,4 +81,42 @@
   </div>
 
 </div>
+
+<style>
+.job-detail-card {
+    background: #f9faff;
+    border-radius: 20px;
+}
+
+.job-detail-card h2 {
+    color: #111;
+}
+
+.job-detail-card .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+}
+
+.job-detail-card p.text-secondary {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.btn-primary {
+    background-color: #2563eb;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #1e3a8a;
+}
+
+.btn-outline-secondary {
+    border-color: #6b7280;
+    color: #6b7280;
+}
+
+
+</style>
 {% endblock %}

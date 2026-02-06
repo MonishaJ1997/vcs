@@ -26,54 +26,62 @@ def save_job(request):
 
     return JsonResponse({'status': 'error'})
 
-
-
-
-
-
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
+from .models import Job, SavedJob
+from django.shortcuts import render
+from django.core.paginator import Paginator
+from django.db.models import Q
 from .models import Job, SavedJob
 
 def job_list(request):
     jobs = Job.objects.all().order_by('-created_at')
 
-    keyword = request.GET.get('keyword')
-    location = request.GET.get('location')
-
-    # 🔍 Keyword search
+    # Keyword & location filter
+    keyword = request.GET.get('keyword', '')
+    location = request.GET.get('location', '')
     if keyword:
         jobs = jobs.filter(
             Q(title__icontains=keyword) |
             Q(company__icontains=keyword)
         )
-
-    # 📍 Location filter
     if location:
         jobs = jobs.filter(location__icontains=location)
 
-    # 📄 Pagination – 6 jobs per page
+    # Working schedule filter
+    schedules_selected = request.GET.getlist('schedule')
+    if schedules_selected:
+        jobs = jobs.filter(working_schedule__in=schedules_selected)
+
+    # Work type filter
+    work_types_selected = request.GET.getlist('work_type')
+    if work_types_selected:
+        jobs = jobs.filter(work_type__in=work_types_selected)
+
+    
+
+    # Pagination - 6 jobs per page
     paginator = Paginator(jobs, 6)
     page_number = request.GET.get('page')
     jobs = paginator.get_page(page_number)
 
-    # 🔖 Saved jobs
+    # Saved jobs
     saved_jobs = []
     if request.user.is_authenticated:
-        saved_jobs = SavedJob.objects.filter(
-            user=request.user
-        ).values_list('job_id', flat=True)
+        saved_jobs = SavedJob.objects.filter(user=request.user).values_list('job_id', flat=True)
 
-    return render(request, 'jobs/job_list.html', {
+    context = {
         'jobs': jobs,
         'saved_jobs': saved_jobs,
         'keyword': keyword,
-        'location': location
-    })
+        'location': location,
+        'schedules_selected': schedules_selected,
+        'work_types_selected': work_types_selected,
+       
+    }
 
-
-
+    return render(request, 'jobs/job_list.html', context)
 
 
 from django.contrib.auth.decorators import login_required
@@ -119,6 +127,13 @@ def apply_job(request, job_id):
     })
 
 
+from django.shortcuts import render, get_object_or_404
+from .models import Job
+
+def job_detail(request, pk):
+    job = get_object_or_404(Job, id=pk)
+    context = {'job': job}
+    return render(request, 'jobs/job_detail.html', context)
 
 
 

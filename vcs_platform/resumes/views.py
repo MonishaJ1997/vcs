@@ -76,7 +76,7 @@ def upload_resume(request):
             resume.user = request.user
             resume.save()
             messages.success(request, "Resume uploaded successfully!")
-            return redirect('upload')
+            
         else:
             messages.error(request, "Please correct the errors below.")
     else:

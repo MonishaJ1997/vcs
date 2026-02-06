@@ -6,13 +6,12 @@ import json
 
 from resumes.models import JobMatch, Resume
 from resumes.utils import extract_resume_text, analyze_resume
-
-
 @method_decorator(login_required, name='dispatch')
 class ChatbotAskView(View):
 
     def post(self, request):
 
+        # ---------------- REQUEST PARSE ----------------
         try:
             data = json.loads(request.body)
             question = data.get('question', '').strip().lower()
@@ -22,86 +21,136 @@ class ChatbotAskView(View):
         if not question:
             return JsonResponse({'answer': 'Please type a question.'})
 
-        # User Plan
-        if hasattr(request.user, 'profile') and getattr(request.user.profile, 'is_pro', False):
-            user_type = 'Pro'
-        else:
-            user_type = 'Free'
+        user_type = "Pro" if is_pro_user(request.user) else "Free"
+        response = ""
 
-        greetings = ["hi", "hello", "hey","hlo"]
+        greetings = ["hi", "hello", "hey", "hlo"]
         farewells = ["bye", "goodbye"]
         thanks = ["thanks", "thank you"]
 
-        response = ""
-
-        # GREETINGS
+        # ---------------- GREETINGS ----------------
         if any(word in question for word in greetings):
             response = "Hi 👋 How can I help your career today?"
 
-        # FAREWELL
+        # ---------------- FAREWELL ----------------
         elif any(word in question for word in farewells):
             response = "Goodbye! Wishing you success 🚀"
 
-        # THANKS
+        # ---------------- THANKS ----------------
         elif any(word in question for word in thanks):
             response = "You're welcome 😊"
 
-        # JOB MATCH %
+        # ---------------- CODING FOLLOW UP (PRO) ----------------
+        elif "coding" in question or "problem" in question:
+
+            if user_type == "Free":
+                response = "Upgrade to Pro to view coding interview problems."
+
+            else:
+                coding_questions = CompanyInterviewQuestion.objects.filter(
+                    category__iexact="coding"
+                )[:5]
+
+                if coding_questions.exists():
+                    result = "Coding Problems:\n"
+                    for q in coding_questions:
+                        diff = getattr(q, "difficulty", "Medium")
+                        result += f"\n{q.question} (Difficulty: {diff})"
+                    response = result
+                else:
+                    response = "No coding problems available."
+
+        # ---------------- COMPANY INTERVIEW QUESTIONS (PRO) ----------------
+        elif "interview" in question or "questions" in question:
+
+            if user_type == "Free":
+                response = "Company interview questions are available for Pro users only."
+
+            else:
+                company_match = re.search(r"(infosys|tcs|wipro|google|amazon)", question)
+
+                if company_match:
+                    company = company_match.group(1)
+
+                    questions = CompanyInterviewQuestion.objects.filter(
+                        company__icontains=company
+                    )
+
+                    if questions.exists():
+                        result = f"{company.title()} Interview Questions:\n"
+                        for q in questions:
+                            result += f"\n[{q.category}] {q.question}"
+                        response = result
+                    else:
+                        response = f"No interview questions found for {company.title()}."
+                else:
+                    response = "Please mention a company name."
+
+        # ---------------- JOB MATCH % ----------------
         elif "match" in question:
+
             matches = JobMatch.objects.filter(
                 user=request.user
             ).order_by('-percentage')[:3]
 
             if matches.exists():
                 result = "Your Top Job Matches:\n"
-
                 for m in matches:
                     result += f"{m.job.title} - {m.percentage}%\n"
-
                 response = result
             else:
                 response = "Upload your resume first to get job match results."
 
-        # RESUME ANALYSIS
+        # ---------------- RESUME ANALYSIS ----------------
         elif "analyze resume" in question or "skills" in question:
 
-            resume = Resume.objects.filter(
-                user=request.user
-            ).last()
+            resume = Resume.objects.filter(user=request.user).last()
 
             if resume:
-                text = extract_resume_text(resume.file.path)
+                text = extract_resume_text(resume.resume_file.path)
                 skills = analyze_resume(text)
 
                 if skills:
                     response = f"Detected Skills: {', '.join(skills)}"
                 else:
-                    response = "No skills detected. Try updating your resume."
+                    response = "No skills detected."
             else:
                 response = "Please upload a resume first."
 
-        # RESUME HELP
+        # ---------------- RESUME HELP ----------------
         elif "resume" in question:
             if user_type == "Pro":
-                response = "Upload your resume — I will analyze skills and give improvement suggestions."
+                response = "Upload your resume — I will analyze skills and give suggestions."
             else:
-                response = "You can upload resume. Upgrade to Pro for AI analysis."
+                response = "Upload resume. Upgrade to Pro for AI analysis."
 
-        # JOB HELP
+        # ---------------- JOB HELP ----------------
         elif "job" in question:
             if user_type == "Pro":
-                response = "I can show advanced job matches with percentage."
+                response = "I can show advanced AI job matches."
             else:
                 response = "Browse jobs. Upgrade to Pro for AI matching."
 
-        # DEFAULT
+        # ---------------- DEFAULT ----------------
         else:
             if user_type == "Pro":
                 response = f"[Pro AI] Detailed answer for: '{question}'"
             else:
                 response = f"[Free AI] Basic answer for: '{question}'"
 
+        # ---------------- SAVE CHAT ----------------
+        ChatConversation.objects.create(
+            user=request.user,
+            question=question,
+            answer=response
+        )
+
         return JsonResponse({'answer': response})
+
+
+
+
+
 
 
 from django.views import View
@@ -162,3 +211,9 @@ class ChatbotUploadResumeView(View):
             'message': f"✅ Resume analyzed!\nUser Type: {user_type}\nDetected Skills: {skills_text}\nTop Job Matches:\n{match_text}",
             'user_type': user_type
         })
+
+
+from .permissions import is_pro_user
+import re
+from chatbot.models import CompanyInterviewQuestion, ChatConversation
+

@@ -21,18 +21,19 @@
       <div class="detail-row">
         <span>User Type</span>
         <span class="badge {{ request.user.user_type }}">
-          {{ request.user.user_type|upper }}
+          {{ request.user.profile.user_type|upper }}
         </span>
       </div>
 
-      <div class="detail-row">
-        <span>Subscription</span>
-        {% if request.user.pro_subscription_active %}
-          <span class="status active">Active</span>
-        {% else %}
-          <span class="status inactive">Not Active</span>
-        {% endif %}
-      </div>
+     <div class="detail-row">
+    <span>Subscription</span>
+    {% if request.user.profile.user_type == "pro" or request.user.pro_subscription_active %}
+        <span class="status active">Active</span>
+    {% else %}
+        <span class="status inactive">Not Active</span>
+    {% endif %}
+</div>
+
 
       <div class="detail-row">
         <span>WhatsApp</span>
@@ -51,7 +52,7 @@
         Edit Profile
       </a>
 
-      {% if request.user.user_type == "free" %}
+      {% if request.user.profile.user_type == "free" %}
       <a href="/accounts/pro" class="btn upgrade">
         Upgrade to Pro
       </a>

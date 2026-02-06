@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+ {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -6,46 +6,155 @@
     <div class="row justify-content-center">
         <div class="col-lg-8">
 
-            <div class="card shadow">
+            <!-- Main Card -->
+            <div class="card shadow-lg" id="application-card">
                 <div class="card-body p-4">
-                    <h4 class="fw-bold mb-3">Apply for {{ job.title }}</h4>
+                    <h4 class="fw-bold mb-4">Apply for {{ job.title }}</h4>
 
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         {% for field in form %}
-                        <div class="mb-3">
-                            <label class="form-label">
-                                {{ field.label }} 
-                                {% if field.field.required %}
-                                    <span class="text-danger">*</span>
+                            {% if field.name != 'cover_letter' %}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">
+                                    {{ field.label }}
+                                    {% if field.field.required %}
+                                        <span class="text-danger">*</span>
+                                    {% endif %}
+                                </label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger mt-1 small">
+                                        {{ field.errors|striptags }}
+                                    </div>
                                 {% endif %}
-                            </label>
-                            {{ field }}
-                            {% if field.errors %}
-                                <div class="text-danger mt-1">
-                                    {{ field.errors|striptags }}
-                                </div>
+                            </div>
                             {% endif %}
-                        </div>
                         {% endfor %}
 
-                        <button type="submit" class="btn btn-success mt-3">Submit Application</button>
-                    </form>
+                         <!-- Cover Letter Field -->
+            <div class="cover-letter-wrapper mt-3">
+                <label class="form-label fw-semibold">
+                    {{ form.cover_letter.label }}
+                    {% if form.cover_letter.field.required %}
+                        <span class="text-danger">*</span>
+                    {% endif %}
+                </label>
+                {{ form.cover_letter }}
+                {% if form.cover_letter.errors %}
+                    <div class="text-danger mt-1 small">
+                        {{ form.cover_letter.errors|striptags }}
+                    </div>
+                {% endif %}
+            </div>
 
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">Submit Application</button>
+                        </div>
+                    </form>
                 </div>
             </div>
+
+           
 
         </div>
     </div>
 </div>
 
+
 <style>
-/* Green star for required fields */
-.form-label .text-success {
+/* Card styling */
+.card {
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+}
+
+/* Form input focus */
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+    border-color: #2563eb;
+}
+
+/* Submit button */
+.btn-success {
+    background-color: #16a34a;
+    border: none;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+.btn-success:hover {
+    background-color: #13832f;
+}
+
+/* Heading styling */
+h4 {
+    color: #111827;
+}
+
+/* Responsive spacing */
+@media (max-width: 576px) {
+    .card-body {
+        padding: 20px;
+    }
+    h4 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Required field star */
+.form-label .text-danger {
     font-weight: bold;
     margin-left: 4px;
 }
-</style>
 
+/* Cover letter field outside card on small screens */
+@media (max-width: 576px) {
+   .cover-letter-wrapper {
+        margin-left: -15px;
+        margin-right: -15px;
+        padding: 15px;
+       
+     
+        margin-bottom: 20px;
+    }
+
+    .cover-letter-wrapper textarea {
+        min-height: 120px;
+    }
+}
+/* Make cover letter responsive */
+.cover-letter-wrapper {
+    
+    padding: 20px;
+    border-radius: 12px;
+    /*border: 1px solid #e5e7eb;*/
+}
+
+.cover-letter-wrapper textarea {
+    width: 100% !important; /* full width */
+    min-height: 140px;       /* enough height for typing */
+    resize: vertical;        /* allow user to resize vertically */
+    padding: 10px;
+    border-radius: 8px;
+  
+    font-size: 14px;
+}
+
+/* Small screens adjustments */
+@media (max-width: 768px) {
+    .cover-letter-wrapper {
+       
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 12px;
+    }
+
+    .cover-letter-wrapper textarea {
+        width: 100% !important; /* full width on small screens too */
+    }
+}
+
+</style>
 {% endblock %}

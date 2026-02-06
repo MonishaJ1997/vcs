@@ -1,38 +1,45 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 pt-5" style="min-height: 80vh;">
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-            <div class="card shadow">
+            <!-- Chatbot Card -->
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-primary text-white text-center rounded-top-4">
+                    <h3 class="fw-bold mb-0">AI Career Chatbot</h3>
+                </div>
                 <div class="card-body">
-                    <h3 class="fw-bold text-center mb-4">AI Career Chatbot</h3>
 
                     <!-- Chat Box -->
-                    <div id="chat-box" class="border rounded p-3 mb-3" style="height:350px; overflow-y:auto; background:#f9f9f9;">
+                    <div id="chat-box" class="border rounded p-3 mb-3" 
+                         style="height:350px; overflow-y:auto; background:#f9f9f9;">
                         <!-- Messages will appear here -->
                     </div>
 
                     <!-- Resume Upload (Pro only) -->
-                    <div class="input-group mb-2">
+                    <div class="input-group mb-3">
                         <input type="file" id="resume-upload" class="form-control" accept=".pdf,.docx"/>
                         <button class="btn btn-primary" id="upload-resume">Upload Resume</button>
                     </div>
 
                     <!-- Chat Input -->
-                    <div class="input-group">
+                    <div class="input-group mb-2">
                         <input type="text" id="chat-input" class="form-control" placeholder="Type your question..." />
                         <button class="btn btn-success" id="chat-send">Send</button>
                     </div>
 
-                    <!-- Error -->
+                    <!-- Error Message -->
                     <div id="chat-error" class="text-danger mt-2"></div>
+
                 </div>
             </div>
 
         </div>
     </div>
 </div>
+
+<!-- ================== JS ================== -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -40,11 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatInput = document.getElementById('chat-input');
     const chatBox = document.getElementById('chat-box');
     const chatError = document.getElementById('chat-error');
-
     const uploadBtn = document.getElementById('upload-resume');
     const resumeInput = document.getElementById('resume-upload');
 
-    // CSRF token
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -61,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const csrftoken = getCookie('csrftoken');
 
-    // CHAT SEND
+    // Send Chat Message
     sendBtn.addEventListener('click', async () => {
         const question = chatInput.value.trim();
         if (!question) return;
@@ -84,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({ question })
             });
-
             const data = await response.json();
 
             const botMsg = document.createElement('div');
@@ -99,13 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // RESUME UPLOAD
+    // Resume Upload
     uploadBtn.addEventListener('click', async () => {
         const file = resumeInput.files[0];
-        if (!file) {
-            alert("Please select a file to upload.");
-            return;
-        }
+        if (!file) { alert("Please select a file."); return; }
 
         const formData = new FormData();
         formData.append('resume', file);
@@ -116,14 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'X-CSRFToken': csrftoken },
                 body: formData
             });
-
             const data = await response.json();
-
-            if (!response.ok) {
-                // If status 403 or 400
-                alert(data.message + (data.user_type ? `\nUser Type: ${data.user_type}` : ''));
-                return;
-            }
 
             const botMsg = document.createElement('div');
             botMsg.className = 'text-start mb-2';
@@ -140,16 +134,30 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- ================== Styles ================== -->
 <style>
 #chat-box div {
-    padding: 8px 12px;
+    padding: 10px 15px;
     border-radius: 8px;
+    max-width: 85%;
 }
+
 #chat-box .text-end {
-    background-color: #d1e7dd; /* User */
+    background-color: #d1e7dd; /* User messages */
+    margin-left: auto;
 }
+
 #chat-box .text-start {
-    background-color: #f8d7da; /* Bot */
+    background-color: #f8d7da; /* Bot messages */
+    margin-right: auto;
+}
+
+.card-header {
+    font-size: 1.25rem;
+}
+
+@media(max-width:768px){
+    #chat-box { height: 300px; }
 }
 </style>
 {% endblock %}
