@@ -1,34 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <section class="success-wrapper">
   <div class="success-card">
 
     <!-- ICON -->
-    <div class="success-icon">
-      ✓
-    </div>
+    <div class="success-icon">✓</div>
 
     <!-- CONTENT -->
     <h2>Payment Successful</h2>
     <p class="sub-text">
-      Your <strong>Pro Subscription</strong> is now active.
+      Your <strong>{{ plan.title }} Subscription</strong> is now active.
     </p>
 
     <div class="success-details">
-      <p><strong>Plan:</strong> Pro Plan</p>
-      <p><strong>Amount Paid:</strong> ₹ 1999</p>
+      <p><strong>Plan:</strong> {{ plan.title }} Plan</p>
+      <p><strong>Amount Paid:</strong> ₹ {{ plan.price }}</p>
       <p><strong>Status:</strong> Active</p>
     </div>
 
     <!-- BUTTON -->
-    <a href="#" class="success-btn">
-  Download Invoice
-</a>
-
-
+    <a href="#" class="success-btn">Download Invoice</a>
   </div>
 </section>
+
 
 <style>
 

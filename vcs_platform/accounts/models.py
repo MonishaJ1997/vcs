@@ -1,37 +1,56 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.conf import settings
+
 
 class User(AbstractUser):
-    USER_TYPE = (('free','Free'), 
-                 ('pro','Pro'),
-                 ('consultant', 'Consultant'),
-                 )
-    user_type = models.CharField(max_length=10, choices=USER_TYPE, default='free')
+
+    USER_TYPE = (
+        ('free', 'Free'),
+        ('pro', 'Pro'),
+        ('pro_plus', 'Pro Plus'),
+        ('consultant', 'Consultant'),
+        ('admin', 'Admin'),
+    )
+
+    user_type = models.CharField(
+        max_length=15,
+        choices=USER_TYPE,
+        default='free'
+    )
+
     pro_subscription_active = models.BooleanField(default=False)
     whatsapp_number = models.CharField(max_length=15, blank=True, null=True)
 
 
 
+
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings   # ✅ required
 
 class Profile(models.Model):
+
     USER_TYPE_CHOICES = (
         ('free', 'Free User'),
         ('pro', 'Pro User'),
+        ('pro_plus', 'Pro Plus User'),
+        ('consultant', 'Consultant User'),
+        ('admin', 'Admin User'),
     )
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
 
     user_type = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=USER_TYPE_CHOICES,
         default='free'
     )
 
     def __str__(self):
         return self.user.username
+
 
 from django.db import models
 
@@ -67,6 +86,7 @@ class ServicePlan(models.Model):
     PLAN_CHOICES = (
         ('free', 'Free'),
         ('pro', 'Pro'),
+        ('pro_plus','Pro Plus'),
     )
 
     title = models.CharField(max_length=100)
@@ -96,12 +116,13 @@ class Plan(models.Model):
     PLAN_TYPE = (
         ('free', 'Free'),
         ('pro', 'Pro'),
+        ('pro_plus','Pro Plus'),
     )
 
     plan_type = models.CharField(max_length=10, choices=PLAN_TYPE)
     title = models.CharField(max_length=100)
     description = models.TextField()
-    price = models.IntegerField(default=0)  # Free = 0, Pro = 1999
+    price = models.CharField(max_length=100, null=True, blank=True)  # Free = 0, Pro = 1999
 
     def __str__(self):
         return self.title
@@ -143,7 +164,7 @@ class Subscription(models.Model):
 
     
 
-    amount_paid = models.IntegerField(default=0)
+    amount_paid = models.CharField(default=0)
     payment_status = models.BooleanField(default=False)
     #is_active = models.BooleanField(default=True)
     plan = models.CharField(max_length=10, choices=PLAN_CHOICES, default='FREE')

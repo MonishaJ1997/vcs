@@ -1,155 +1,142 @@
-
-
 {% extends 'base.html' %}
 {% block content %}
 
-<section class="plan-page py-5" style="background: #e9f2ff;">
+<section class="plan-section">
   <div class="container">
-    <div class="row justify-content-center">
 
-      <!-- Pro Plan Card -->
-      <div class="col-md-6">
-        <div class="card shadow-sm border-primary">
-          <div class="card-header text-center bg-primary text-white">
-            <h2 class="mb-0">{{ plan.title }}</h2>
-          </div>
-          <div class="card-body text-center">
-            <p class="lead">{{ plan.description }}</p>
+    <!-- ===== SECTION HEADER ===== -->
+    <div class="text-center mb-5">
+      <h2 class="fw-bold plan-title">Our Plans</h2>
+      <p class="text-muted">Choose the plan that fits your career journey</p>
+    </div>
 
-            <!-- Features -->
-            <ul class="list-group list-group-flush mt-4 mb-4">
-              {% for feature in plan.features.all %}
-              <li class="list-group-item">
-                <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                {{ feature.text }}
-              </li>
-              {% endfor %}
-            </ul>
+    <div class="row justify-content-center g-4">
 
-            <!-- Subscribe Button -->
-            <a href="#" class="btn btn-primary btn-lg w-50">Subscribe Now</a>
+      {% for plan in plans %}
+      <div class="col-lg-4 col-md-6 d-flex">
+        <div class="card plan-card w-100 text-center p-4
+          {% if plan.plan_type == 'free' %} free-card
+          {% elif plan.plan_type == 'pro' %} pro-card
+          {% elif plan.plan_type == 'pro_plus' %} proplus-card
+          {% endif %}
+        ">
+          <!-- PLAN TITLE -->
+          <h4 class="fw-bold">{{ plan.title }}</h4>
+
+          <!-- PLAN PRICE -->
+          <h3 class="price mt-3">₹{{ plan.price }}</h3>
+
+          <!-- PLAN DESCRIPTION -->
+          <p class="text-white">{{ plan.description }}</p>
+
+          <!-- PLAN FEATURES -->
+          <ul class="plan-features mt-4">
+            {% for f in plan.features.all %}
+            <li>{{ f.text }}</li>
+            {% endfor %}
+          </ul>
+
+          <!-- PLAN BUTTON -->
+          <div class="mt-auto">
+            {% if plan.plan_type == 'free' %}
+            <a href="#" class="btn plan-btn free-btn w-100 mt-3">Start Free</a>
+            {% elif plan.plan_type == 'pro' %}
+            <a href="{% url 'payment' 'pro' %}" class="btn plan-btn pro-btn w-100 mt-3">Get Pro</a>
+            {% elif plan.plan_type == 'pro_plus' %}
+            <a href="{% url 'payment' 'pro_plus' %}" class="btn plan-btn proplus-btn w-100 mt-3">Get Pro Plus</a>
+            {% endif %}
           </div>
         </div>
       </div>
+      {% endfor %}
 
     </div>
   </div>
 </section>
 
-
-
+<!-- ===== SECTION CSS ===== -->
 <style>
-    
-/* Section */
-.plan-section {
-              /* FULL green background */
-    min-height: 100vh;
-    padding-top: 100px;           /* space for fixed navbar */
-    padding-bottom: 60px;
-    display: flex;
-    align-items: flex-start;      /* prevent vertical cut */
+.plan-section{
+    padding-top:120px;
+    padding-bottom:60px;
+    background:#f6f9fc;
+    min-height:100vh;
 }
 
-/* Card */
-.plan-card {
-    background: #ffffff;
-    background: #19416d;  
-    border-radius: 14px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    overflow: hidden;
-    width: 500px;
-    color: white;
+.plan-title{
+    font-size:34px;
+    color:#1a2a44;
 }
 
-/* Header */
-.plan-header {
-    background: #1f8a70;          /* darker green */
-    color: #fff;
-    padding: 30px 20px;
-    text-align: center;
+.plan-card{
+    border-radius:16px;
+    border:none;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    transition:0.3s;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
 }
 
-.plan-header h2 {
-    margin-bottom: 8px;
-    font-weight: 600;
+.plan-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 18px 35px rgba(0,0,0,0.15);
 }
 
-.plan-header p {
-    font-size: 14px;
-    opacity: 0.9;
+/* PLAN BACKGROUNDS */
+.free-card{ background:linear-gradient(135deg,#16a34a,#22c55e); }
+.pro-card{ background:linear-gradient(135deg,#2563eb,#3b82f6); }
+.proplus-card{ background:linear-gradient(135deg,#dc2626,#ef4444); }
+
+.price{
+    font-size:28px;
+    font-weight:700;
+    color:white;
 }
 
-/* Body */
-.plan-body {
-    padding: 30px 25px;
+.plan-features{
+    list-style:none;
+    padding:0;
+    text-align:left;
 }
 
-
-/* Features 
-.plan-features {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0 30px;
+.plan-features li{
+    padding:8px 0;
+    display:flex;
+    gap:10px;
+    align-items:center;
 }
 
-.plan-features li {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 8px 0;
-    font-size: 15px;
-    color: white;
-    text-align: left;            
-}*/
-.plan-features li {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 8px 0;
-    font-size: 15px;
-    color: white;
-    text-align: left;
+.plan-features li::before{
+    content:"✓";
+    width:20px;
+    height:20px;
+    background:white;
+    color:#111;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
 }
 
-/* GREEN ROUND TICK */
-.plan-features li::before {
-    content: "✓";
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background: #1f8a70;   /* green background */
-    color: #ffffff;
-    border-radius: 50%;
-    font-size: 12px;
-    flex-shrink: 0;
-    margin-top: 2px;
+.plan-btn{
+    border-radius:30px;
+    font-weight:600;
+    padding:12px;
+    color:white;
 }
 
-/* Button */
-.plan-btn {
-    display: block;
-    width: fit-content;
-    margin: 0 auto;
-    background: #1f8a70;
-    color: #fff;
-    padding: 12px 40px;
-    border-radius: 30px;
-    font-weight: 600;
-    text-decoration: none;
-}
+/* BUTTON COLORS */
+.free-btn{ background:#15803d; }
+.free-btn:hover{ background:#166534; }
 
-.plan-btn:hover {
-    background: #218838;
-    color: #fff;
-}
+.pro-btn{ background:#1d4ed8; }
+.pro-btn:hover{ background:#1e40af; }
 
-
-
+.proplus-btn{ background:#b91c1c; }
+.proplus-btn:hover{ background:#991b1b; }
 
 </style>
+
 {% endblock %}
-
-
-

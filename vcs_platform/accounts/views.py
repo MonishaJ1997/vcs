@@ -46,7 +46,7 @@ def dashboard(request):
       # latest 5 jobs
     settings = SiteSettings.objects.last()  # hero background image
     steps = HowItWorks.objects.all()
-    plans = ServicePlan.objects.all()
+    plans = Plan.objects.all()
     
 
     return render(request, 'accounts/dashboard.html', {
@@ -64,8 +64,8 @@ from .models import Plan
 from django.contrib import messages
 
 def services(request):
-    plansed = Plan.objects.all()
-    return render(request, 'accounts/services.html', {'plansed': plansed})
+    plans = Plan.objects.all()
+    return render(request, 'accounts/services.html', {'plans': plans})
 
 def free_plan(request):
     plan = Plan.objects.filter(plan_type='free').first()
@@ -97,34 +97,46 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from .models import Plan, Subscription
 
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Plan, Subscription
 
 @login_required
-def payment_page(request):
-    plan = Plan.objects.filter(plan_type='pro').first()
-    if not plan:
-        messages.error(request, "Pro Plan is not available.")
-        return redirect('services')
+def payment_page(request, plan_type):
+    # Get the plan dynamically based on the type
+    
+
+    # Convert 'proplus' in URL to 'pro_plus'
+    plan_type_db = plan_type.replace("proplus", "pro_plus")
+    
+    plan = get_object_or_404(Plan, plan_type__iexact=plan_type_db)
 
     if request.method == "POST":
         subscription, created = Subscription.objects.get_or_create(user=request.user)
 
         subscription.amount_paid = plan.price
         subscription.payment_status = True
+        subscription.plan = plan.plan_type  # store string
         subscription.save()
 
-        # 🔥 UPGRADE USER TO PRO
-        request.user.profile.user_type = "pro"
+        # Upgrade user type
+        if plan.plan_type.lower() == 'pro':
+            request.user.profile.user_type = "pro"
+        elif plan.plan_type.lower() == 'pro_plus':
+            request.user.profile.user_type = "proplus"
+
         request.user.profile.save()
 
-        messages.success(request, "Payment successful! You are now a Pro user.")
-        return redirect('payment_success')
+        messages.success(request, f"✅ Payment successful! You are now a {plan.title} user.")
+        return redirect('payment_success', plan_type=plan.plan_type)
 
     return render(request, 'accounts/payment.html', {'plan': plan})
 
 @login_required
-def payment_success(request):
-    # Just show success page
-    return render(request, 'accounts/success.html')
+def payment_success(request, plan_type):
+    plan = get_object_or_404(Plan, plan_type__iexact=plan_type)
+    return render(request, 'accounts/success.html', {'plan': plan})
 
 
 from django.http import HttpResponse

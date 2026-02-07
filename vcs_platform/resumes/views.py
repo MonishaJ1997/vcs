@@ -61,29 +61,42 @@ def create_resume(request, template_id):
 
 
 
-
 from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import ResumeUploadForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Resume
+from .forms import ResumeUploadForm
 
 @login_required
 def upload_resume(request):
+
     if request.method == "POST":
+
+        # 🔍 check limit ONLY when submitting
+        if request.user.user_type == 'free':
+            resume_count = Resume.objects.filter(user=request.user).count()
+
+            if resume_count >= 1:
+                messages.error(
+                    request,
+                    "You already uploaded one resume. Upgrade to Pro or Pro Plus to upload multiple resumes."
+                )
+                return redirect('resumes:upload')
+
         form = ResumeUploadForm(request.POST, request.FILES)
+
         if form.is_valid():
             resume = form.save(commit=False)
             resume.user = request.user
             resume.save()
-            messages.success(request, "Resume uploaded successfully!")
-            
-        else:
-            messages.error(request, "Please correct the errors below.")
+
+            messages.success(request, "Resume uploaded successfully.")
+            return redirect('resumes:upload')
+
     else:
         form = ResumeUploadForm()
+
     return render(request, 'resumes/upload.html', {'form': form})
-
-
 
 
 

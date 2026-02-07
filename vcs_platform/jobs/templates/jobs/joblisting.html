@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+
+
 {% block content %}
 
 <div class="container-fluid mt-5 pt-4">
@@ -86,60 +88,53 @@
             </div>
         </div>
 
+        <!-- ================= JOB LIST ================= -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold">Recommended Jobs</h3>
+            </div>
 
+            <div class="row g-4">
+                {% for job in jobs %}
+                <div class="col-md-6 col-xl-4">
+                    <div class="job-card-modern card-blue p-4 h-100">
 
-<!-- ================= JOB LIST ================= -->
-<div class="col-lg-9">
+                        <div class="mb-3">
+                            <h5 class="fw-bold">{{ job.title }}</h5>
+                            <p class="text-muted mb-1">{{ job.company }}</p>
+                            <p class="small text-secondary">
+                                {{ job.location }} • {{ job.experience }} • 
+                                {% if job.salary %}
+                                    {{ job.salary }}
+                                {% else %}
+                                    Not Specified
+                                {% endif %}
+                            </p>
+                        </div>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-<h3 class="fw-bold">Recommended Jobs</h3>
-</div>
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
 
-<div class="row g-4">
+                            <a href="{% url 'jobs:job_detail' job.id %}" 
+                               class="btn btn-primary btn-sm px-3 rounded-pill">Details</a>
 
-{% for job in jobs %}
-<div class="col-md-6 col-xl-4">
+                            <button class="btn btn-light border save-job-btn" data-job="{{ job.id }}">
+                                {% if job.id in saved_jobs %}
+                                    <i class="bi bi-bookmark-fill"></i>
+                                {% else %}
+                                    <i class="bi bi-bookmark"></i>
+                                {% endif %}
+                            </button>
 
-<div class="job-card-modern 
-{% cycle 'card-peach' 'card-mint' 'card-lavender' 'card-blue' 'card-pink' 'card-cream' %}
-p-4 h-100">
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center">No jobs available</p>
+                {% endfor %}
+            </div>
 
-<div class="mb-3">
-<h5 class="fw-bold">{{ job.title }}</h5>
-<p class="text-muted mb-1">{{ job.company }}</p>
-<p class="small text-secondary">{{ job.location }} • {{ job.experience }}</p>
-</div>
-
-<div class="mt-auto d-flex justify-content-between align-items-center">
-<a href="{% url 'jobs:job_detail' job.id %}" 
-                               class="btn btn-dark btn-sm px-3 rounded-pill">Details</a>
- 
-
-<button class="btn btn-light border save-job-btn"
-data-job="{{ job.id }}">
-
-{% if job.id in saved_jobs %}
-<i class="bi bi-bookmark-fill"></i>
-{% else %}
-<i class="bi bi-bookmark"></i>
-{% endif %}
-
-</button>
- 
-
-</div>
-
-</div>
-</div>
-{% empty %}
-<p class="text-center">No jobs available</p>
-{% endfor %}
-
-</div>
-
-
-
- {% if jobs.has_other_pages %}
+            <!-- Pagination -->
+            {% if jobs.has_other_pages %}
             <nav aria-label="Job pagination">
                 <ul class="pagination justify-content-center mt-4">
                     {% if jobs.has_previous %}
@@ -169,105 +164,45 @@ data-job="{{ job.id }}">
             </nav>
             {% endif %}
 
-
-
-
-</div>
-</div>
+        </div>
+    </div>
 </div>
 
-<!-- AJAX SAVE JOB -->
+<!-- ================= AJAX SAVE JOB ================= -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).on('click','.save-job-btn',function(){
-
-let btn=$(this);
-let job_id=btn.data('job');
-
-$.ajax({
-url:"{% url 'jobs:save_job' %}",
-type:"POST",
-data:{
-job_id:job_id,
-csrfmiddlewaretoken:'{{ csrf_token }}'
-},
-success:function(res){
-
-if(res.status==='saved'){
-btn.html('<i class="bi bi-bookmark-fill"></i>');
-}
-else{
-btn.html('<i class="bi bi-bookmark"></i>');
-}
-}
-});
-
+    let btn=$(this);
+    let job_id=btn.data('job');
+    $.ajax({
+        url:"{% url 'jobs:save_job' %}",
+        type:"POST",
+        data:{
+            job_id:job_id,
+            csrfmiddlewaretoken:'{{ csrf_token }}'
+        },
+        success:function(res){
+            if(res.status==='saved'){
+                btn.html('<i class="bi bi-bookmark-fill"></i>');
+            } else {
+                btn.html('<i class="bi bi-bookmark"></i>');
+            }
+        }
+    });
 });
 </script>
 
+<!-- ================= STYLES ================= -->
 <style>
-
-/* PAGE BG */
-body{
-background:#f5f7fb;
-}
-
-/* SIDEBAR */
-.sidebar{
-background:#f6f7f9;
-border-radius:18px;
-border:1px solid #e5e7eb;
-}
-
-/* JOB CARD BASE */
-.job-card-modern{
-border-radius:20px;
-border:1px solid #e5e7eb;
-display:flex;
-flex-direction:column;
-transition:0.3s;
-}
-
-.job-card-modern:hover{
-transform:translateY(-5px);
-box-shadow:0 12px 28px rgba(0,0,0,0.06);
-}
-
-/* PASTEL COLORS */
-.card-peach{ background:#fde8d7; }
-.card-mint{ background:#dff3ee; }
-.card-lavender{ background:#ebe7fb; }
+body { background:#f5f7fb; }
+.sidebar{ background:#f6f7f9; border-radius:18px; border:1px solid #e5e7eb; }
+.job-card-modern{ border-radius:20px; border:1px solid #e5e7eb; display:flex; flex-direction:column; transition:0.3s; }
+.job-card-modern:hover{ transform:translateY(-5px); box-shadow:0 12px 28px rgba(0,0,0,0.06); }
 .card-blue{ background:#e3f0fb; }
-.card-pink{ background:#fbe4ef; }
-.card-cream{ background:#fff4db; }
-
-/* APPLY BUTTON */
-.btn-dark{
-background:#000;
-border:none;
-}
-
-.btn-dark:hover{
-background:#333;
-}
-
-/* SAVE BUTTON */
-.save-job-btn{
-width:40px;
-height:40px;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:50%;
-}
-
-/* MOBILE */
-@media(max-width:992px){
-.sidebar{
-margin-bottom:20px;
-}
-}
-
+.btn-primary{ background:#2563eb; border:none; }
+.btn-primary:hover{ background:#1e4db7; }
+.save-job-btn{ width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:50%; color:#2563eb; }
+@media(max-width:992px){ .sidebar{ margin-bottom:20px; } }
 </style>
 
-{% endblock %} 
+{% endblock %}

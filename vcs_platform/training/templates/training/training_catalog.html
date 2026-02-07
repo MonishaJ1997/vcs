@@ -63,41 +63,53 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
+
 .training-card {
   border-radius: 16px;
   overflow: hidden;
-  border: none;
+  border: 2px solid rgb(212, 212, 218);
   transition: 0.3s ease;
+  background: white; /* light blue background */
+  color: #111827; /* text color */
 }
+
 .training-card:hover {
   transform: translateY(-6px);
   box-shadow: 0 14px 30px rgba(0,0,0,0.12);
 }
+
 .training-badge {
-  background: #dcfce7;
-  color: #065f46;
+  background: white; /* slightly lighter blue */
+  color: black;
   padding: 14px;
   font-size: 13px;
   font-weight: 500;
+  border-bottom: 1px solid #b0d4f0;
 }
+
 .training-card img {
   height: 210px;
   width: 100%;
   object-fit: cover;
+  border-bottom: 1px solid #b0d4f0;
 }
+
 .btn-success {
   background-color: #16a34a;
   border: none;
   border-radius: 8px;
 }
+
 .btn-outline-success {
   border: 2px solid #16a34a;
   color: #16a34a;
   border-radius: 8px;
 }
+
 .btn-outline-success:hover {
   background: #16a34a;
   color: #fff;
 }
+
 </style>
 {% endblock %}

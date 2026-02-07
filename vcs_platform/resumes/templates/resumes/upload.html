@@ -13,7 +13,7 @@
                         Please upload your resume (PDF or DOCX, max 5MB)
                     </p>
 
-                    <!-- Display messages -->
+                    <!-- Display messages --
                     {% if messages %}
                         {% for message in messages %}
                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -21,7 +21,32 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         {% endfor %}
-                    {% endif %}
+                    {% endif %}-->
+
+
+
+                    <!-- Display messages -->
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert 
+      {% if message.tags == 'error' %}alert-danger
+      {% else %}alert-{{ message.tags }}
+      {% endif %}
+      alert-dismissible fade show">
+
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      {{ message }}
+
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+{% if user.user_type == 'free' %}
+<div class="alert alert-info text-center">
+Free users can upload only <strong>1 resume</strong>.
+</div>
+{% endif %}
 
                     <!-- Resume Upload Form -->
                     <form method="POST" enctype="multipart/form-data">
@@ -34,6 +59,7 @@
                             </button>
                         </div>
                     </form>
+
 
                 </div>
             </div>

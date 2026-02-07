@@ -33,8 +33,10 @@ urlpatterns = [
     path('pro/', views.pro_plan, name='pro_plan'),
     path('profile/',views.profile,name='profile'),
 
-    path('payment/', views.payment_page, name='payment'),
-    path('payment/success/', views.payment_success, name='payment_success'),
+    #path('payment/', views.payment_page, name='payment'),
+    path('payment/success/<str:plan_type>/', views.payment_success, name='payment_success'),
+    path('payment/<str:plan_type>/', views.payment_page, name='payment'),
+
     path('invoice/download/', views.download_invoice, name='download_invoice'),
 
 

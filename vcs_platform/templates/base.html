@@ -109,10 +109,15 @@ body {
 </li>
 
 
-
+<!----
         <li class="nav-item">
           <a class="nav-link {% if request.resolver_match.url_name == 'training_catalog' %}active{% endif %}"
              href="{% url 'training_catalog' %}">Training</a>
+        </li>-->
+
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}"
+             href="{% url 'services' %}">Services</a>
         </li>
 
         <li class="nav-item">

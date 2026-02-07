@@ -148,58 +148,69 @@
 
 
 
-<section class="services-split">
-  <div class="container text-center mb-5">
-    <h2 class="services-title fw-bold mt-2">Our Services</h2>
-    <p class="services-subtitle">
-      Choose the plan that fits your career journey
-    </p>
-  </div>
-  <div class="container">
-    <div class="row g-0">
-
-      {% for plan in plans %}
-      <div class="col-md-6 {{ plan.plan_type }}-plan">
-        <div class="service-box">
-
-          <h2>{{ plan.title }}</h2>
-          <h5>{{ plan.subtitle }}</h5>
-          <p class="service-desc">{{ plan.description }}</p>
-
-          <!-- FEATURES -->
-          <!--
-          <ul class="feature-list">
-            {% for feature in plan.features.all %}
-            <li>
-              <i class="bi bi-check-circle-fill"></i>
-              {{ feature.feature_text }}
-            </li>
-            {% endfor %}
-          </ul>
-          -->
-
           <!-- BUTTON: Only show one button per plan --
           {% if plan.plan_type == 'free' %}
             <a href="/accounts/free/" class="service-btn free-plans mt-3">Free Plan</a>
           {% elif plan.plan_type == 'pro' %}
             <a href="/accounts/pro/" class="service-btn pro-plans mt-3">Pro Plan</a>
           {% endif %}-->
+<section class="services-section py-5">
+  <div class="container text-center mb-5">
+    <h2 class="fw-bold mt-2">Our Services</h2>
+    <p class="text-muted">
+      Choose the plan that fits your career journey
+    </p>
+  </div>
+
+  <div class="container">
+    <div class="row g-4">
+
+      {% for plan in plans %}
+      <div class="col-md-4">
+        <div class="card service-card shadow-sm border-0 h-100 text-center p-4">
+
+          <h4 class="fw-bold">{{ plan.title }}</h4>
+          <h6 class="text-muted">{{ plan.subtitle }}</h6>
+          <p class="mt-3">{{ plan.description }}</p>
 
 
+    
 
-          {% if plan.plan_type == 'free' %}
-    {% if request.user.is_authenticated %}
-        <a href="/accounts/free/" class="service-btn free-plans mt-3">Free Plan</a>
-    {% else %}
-        <a href="javascript:void(0);" class="service-btn free-plans mt-3 disabled" title="Login to access">Free Plan</a>
-    {% endif %}
+{% if plan.plan_type == 'free' %}
+    <a href="{% if request.user.is_authenticated %}/accounts/services/{% else %}javascript:void(0);{% endif %}"
+       class="service-btn free-plans mt-3">
+       Free Plan
+    </a>
+
 {% elif plan.plan_type == 'pro' %}
-    {% if request.user.is_authenticated %}
-        <a href="/accounts/pro/" class="service-btn pro-plans mt-3">Pro Plan</a>
-    {% else %}
-        <a href="javascript:void(0);" class="service-btn pro-plans mt-3 disabled" title="Login to access">Pro Plan</a>
-    {% endif %}
+    <a href="{% if request.user.is_authenticated %}/accounts/services/{% else %}javascript:void(0);{% endif %}"
+       class="service-btn pro-plans mt-3">
+       Pro Plan
+    </a>
+
+{% elif plan.plan_type == 'pro_plus' %}
+    <a href="{% if request.user.is_authenticated %}/accounts/services/{% else %}javascript:void(0);{% endif %}"
+       class="service-btn proplus-plans mt-3">
+       Pro Plus Plan
+    </a>
 {% endif %}
+<!----
+<div class="mt-3">
+    {% if plan.plan_type == 'free' %}
+        <a href="#" class="btn btn-outline-success w-100">Free Plan</a>
+
+    {% elif plan.plan_type == 'pro' %}
+        <a href="#" class="btn btn-primary w-100">Pro Plan</a>
+
+    {% elif plan.plan_type == 'pro_plus' %}
+        <a href="#" class="btn btn-danger w-100">Pro Plus Plan</a>
+
+    {% else %}
+        <a href="#" class="btn btn-secondary w-100">Select Plan</a>
+    {% endif %}
+</div>-->
+
+
 
 
         </div>
@@ -450,16 +461,10 @@
   color: #fff;
 }
 
-/* FREE – Green */
-.free-plan {
-  background: #2563eb;
-  color: #000;
-}
 
-/* PRO – Blue */
-.pro-plan {
-  background:#16a34a;
-  color: #000 !important;
+
+.proplus-plans {
+    background-color: #15803d !important;
 }
 
 .feature-list {
@@ -495,6 +500,7 @@
   height: 100%; /* Make cards same height */
   padding: 30px;
   position: relative;
+  
 }
 
 .service-btn {
@@ -510,14 +516,14 @@
 
 /* FREE PLAN BUTTON – GREEN */
 .free-plans {
-  background-color: green;
+  background-color:#15803d;
   color: white;
 }
 
 
 /* PRO PLAN BUTTON – BLUE */
 .pro-plans {
-  background-color:#2563eb;
+  background-color:#15803d;
   color: white;
 }
 
@@ -531,6 +537,25 @@
 .services-title,.services-subtitle{
   color:#1f2b5b
 }
+
+
+
+
+
+
+
+.service-card{
+  border-radius:12px;
+  transition:0.3s ease;
+  background:linear-gradient(135deg,#16a34a,#22c55e);
+  color: white;
+}
+
+.service-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
 </style>
 
 {% endblock %}
