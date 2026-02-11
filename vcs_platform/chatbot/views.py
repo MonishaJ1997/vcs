@@ -4,12 +4,44 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 import json
 
+
+from django.utils import timezone
+from datetime import datetime
+import json
+import re
+
 from resumes.models import JobMatch, Resume
 from resumes.utils import extract_resume_text, analyze_resume
+from chatbot.models import CompanyInterviewQuestion, ChatConversation
+
+
 @method_decorator(login_required, name='dispatch')
 class ChatbotAskView(View):
 
     def post(self, request):
+
+        # ---------------- USER TYPE ----------------
+        user_type = getattr(request.user, "user_type", "").lower()
+
+        # 🚫 Block free users completely
+        if user_type not in ["pro", "pro_plus"]:
+            return JsonResponse({
+                "answer": "🚫 Chatbot is available only for Pro and Pro Plus users."
+            })
+
+        # ---------------- MONTHLY LIMIT ----------------
+        now = timezone.now()
+        start_month = datetime(now.year, now.month, 1, tzinfo=now.tzinfo)
+
+        monthly_queries = ChatConversation.objects.filter(
+            user=request.user,
+            created_at__gte=start_month
+        ).count()
+
+        if user_type == "pro" and monthly_queries >= 250:
+            return JsonResponse({
+                "answer": "⚠️ You reached your 250 monthly queries limit. Upgrade to Pro Plus for unlimited access."
+            })
 
         # ---------------- REQUEST PARSE ----------------
         try:
@@ -21,7 +53,6 @@ class ChatbotAskView(View):
         if not question:
             return JsonResponse({'answer': 'Please type a question.'})
 
-        user_type = "Pro" if is_pro_user(request.user) else "Free"
         response = ""
 
         greetings = ["hi", "hello", "hey", "hlo"]
@@ -40,53 +71,45 @@ class ChatbotAskView(View):
         elif any(word in question for word in thanks):
             response = "You're welcome 😊"
 
-        # ---------------- CODING FOLLOW UP (PRO) ----------------
+        # ---------------- CODING QUESTIONS ----------------
         elif "coding" in question or "problem" in question:
 
-            if user_type == "Free":
-                response = "Upgrade to Pro to view coding interview problems."
+            coding_questions = CompanyInterviewQuestion.objects.filter(
+                category__iexact="coding"
+            )[:5]
 
+            if coding_questions.exists():
+                result = "Coding Problems:\n"
+                for q in coding_questions:
+                    diff = getattr(q, "difficulty", "Medium")
+                    result += f"\n{q.question} (Difficulty: {diff})"
+                response = result
             else:
-                coding_questions = CompanyInterviewQuestion.objects.filter(
-                    category__iexact="coding"
-                )[:5]
+                response = "No coding problems available."
 
-                if coding_questions.exists():
-                    result = "Coding Problems:\n"
-                    for q in coding_questions:
-                        diff = getattr(q, "difficulty", "Medium")
-                        result += f"\n{q.question} (Difficulty: {diff})"
-                    response = result
-                else:
-                    response = "No coding problems available."
-
-        # ---------------- COMPANY INTERVIEW QUESTIONS (PRO) ----------------
+        # ---------------- COMPANY INTERVIEW ----------------
         elif "interview" in question or "questions" in question:
 
-            if user_type == "Free":
-                response = "Company interview questions are available for Pro users only."
+            company_match = re.search(r"(infosys|tcs|wipro|google|amazon)", question)
 
-            else:
-                company_match = re.search(r"(infosys|tcs|wipro|google|amazon)", question)
+            if company_match:
+                company = company_match.group(1)
 
-                if company_match:
-                    company = company_match.group(1)
+                questions = CompanyInterviewQuestion.objects.filter(
+                    company__icontains=company
+                )
 
-                    questions = CompanyInterviewQuestion.objects.filter(
-                        company__icontains=company
-                    )
-
-                    if questions.exists():
-                        result = f"{company.title()} Interview Questions:\n"
-                        for q in questions:
-                            result += f"\n[{q.category}] {q.question}"
-                        response = result
-                    else:
-                        response = f"No interview questions found for {company.title()}."
+                if questions.exists():
+                    result = f"{company.title()} Interview Questions:\n"
+                    for q in questions:
+                        result += f"\n[{q.category}] {q.question}"
+                    response = result
                 else:
-                    response = "Please mention a company name."
+                    response = f"No interview questions found for {company.title()}."
+            else:
+                response = "Please mention a company name."
 
-        # ---------------- JOB MATCH % ----------------
+        # ---------------- JOB MATCH ----------------
         elif "match" in question:
 
             matches = JobMatch.objects.filter(
@@ -117,26 +140,9 @@ class ChatbotAskView(View):
             else:
                 response = "Please upload a resume first."
 
-        # ---------------- RESUME HELP ----------------
-        elif "resume" in question:
-            if user_type == "Pro":
-                response = "Upload your resume — I will analyze skills and give suggestions."
-            else:
-                response = "Upload resume. Upgrade to Pro for AI analysis."
-
-        # ---------------- JOB HELP ----------------
-        elif "job" in question:
-            if user_type == "Pro":
-                response = "I can show advanced AI job matches."
-            else:
-                response = "Browse jobs. Upgrade to Pro for AI matching."
-
         # ---------------- DEFAULT ----------------
         else:
-            if user_type == "Pro":
-                response = f"[Pro AI] Detailed answer for: '{question}'"
-            else:
-                response = f"[Free AI] Basic answer for: '{question}'"
+            response = f"[AI Career Assistant] Answer for: '{question}'"
 
         # ---------------- SAVE CHAT ----------------
         ChatConversation.objects.create(
@@ -146,10 +152,6 @@ class ChatbotAskView(View):
         )
 
         return JsonResponse({'answer': response})
-
-
-
-
 
 
 

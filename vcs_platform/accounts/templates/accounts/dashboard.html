@@ -502,6 +502,18 @@
   position: relative;
   
 }
+/*
+.service-btn {
+  padding: 12px 32px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 30px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  color: #fff;
+  align-self: flex-start; 
+}
+*/
 
 .service-btn {
   padding: 12px 32px;
@@ -511,8 +523,13 @@
   text-decoration: none;
   transition: all 0.3s ease;
   color: #fff;
-  align-self: flex-start; /* default left, can use flex-end for right */
+  width: 50%; /* button full width */
+  text-align: center;
+  margin-top: auto; 
+   margin: 0 auto; /* ensures button stays at bottom */
 }
+
+
 
 /* FREE PLAN BUTTON – GREEN */
 .free-plans {
@@ -543,12 +560,27 @@
 
 
 
-
+/*
 .service-card{
   border-radius:12px;
   transition:0.3s ease;
   background:linear-gradient(135deg,#16a34a,#22c55e);
   color: white;
+}
+*/
+
+
+.service-card {
+  border-radius: 12px;
+  transition: 0.3s ease;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: white;
+
+  display: flex;
+  flex-direction: column; /* stack content vertically */
+  justify-content: space-between; /* push button to bottom */
+  height: 100%; /* make all cards same height */
+  padding: 30px;
 }
 
 .service-card:hover{
@@ -558,4 +590,4 @@
 
 </style>
 
-{% endblock %}
+{% endblock %} 

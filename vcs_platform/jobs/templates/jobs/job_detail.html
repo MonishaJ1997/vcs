@@ -8,6 +8,20 @@
 
       <div class="card job-detail-card shadow-sm border-0 rounded-4">
         <div class="card-body p-4">
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+
+
+
+
+
 
           <!-- JOB TITLE -->
           <h2 class="fw-bold mb-2">{{ job.title }}</h2>

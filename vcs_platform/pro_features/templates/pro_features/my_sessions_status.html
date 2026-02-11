@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5 pt-5">
+    <h3 class="fw-bold mb-4 text-center">My Session Status</h3>
+
+    <div class="card shadow rounded-4 p-4">
+
+        {% if sessions %}
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Topic</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ session.topic }}</td>
+                    <td>{{ session.session_date|date:"d M Y H:i" }}</td>
+
+                    <td>
+                        {% if session.status == "approved" %}
+                            <span class="badge bg-success">Approved</span>
+
+                        {% elif session.status == "pending" %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+
+                        {% elif session.status == "cancelled" %}
+                            <span class="badge bg-danger">Rejected</span>
+
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+        {% else %}
+            <p class="text-center text-muted">
+                You have not scheduled any sessions yet.
+            </p>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

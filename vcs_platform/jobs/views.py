@@ -84,47 +84,44 @@ def job_list(request):
     return render(request, 'jobs/job_list.html', context)
 
 
-from django.contrib.auth.decorators import login_required
-from .models import SavedJob
+
+from .models import SavedJob, JobApplication
 
 @login_required
 def my_jobs(request):
-    saved_jobs_qs = SavedJob.objects.filter(user=request.user).select_related('job')
 
-    jobs = [saved.job for saved in saved_jobs_qs]
-    saved_job_ids = [job.id for job in jobs]
+    # ---------------- SAVED JOBS ----------------
+    saved_jobs_qs = SavedJob.objects.filter(
+        user=request.user
+    ).select_related('job')
+
+    saved_jobs = [saved.job for saved in saved_jobs_qs]
+    saved_job_ids = [job.id for job in saved_jobs]
+
+    # ---------------- APPLIED JOBS ----------------
+    applied_jobs_qs = JobApplication.objects.filter(
+        user=request.user
+    ).select_related('job')
+
+    applied_jobs = [app.job for app in applied_jobs_qs]
+    applied_job_ids = [job.id for job in applied_jobs]
 
     return render(request, 'jobs/my_jobs.html', {
-        'jobs': jobs,
-        'saved_jobs': saved_job_ids
+        'jobs': saved_jobs,
+        'saved_jobs': saved_job_ids,
+        'applied_jobs': applied_jobs,
+        'applied_job_ids': applied_job_ids
     })
 
 
-from django.shortcuts import render, get_object_or_404
-from .models import Job
-from .forms import JobApplicationForm
 
-def apply_job(request, job_id):
-    job = get_object_or_404(Job, id=job_id)
 
-    if request.method == 'POST':
-        form = JobApplicationForm(request.POST, request.FILES)
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.job = job
-            application.user = request.user
-            application.save()
 
-            return render(request, 'jobs/application_success.html', {
-                'job': job
-            })
-    else:
-        form = JobApplicationForm()
 
-    return render(request, 'jobs/job_apply.html', {
-        'job': job,
-        'form': form
-    })
+
+
+
+
 
 
 from django.shortcuts import render, get_object_or_404
@@ -134,6 +131,132 @@ def job_detail(request, pk):
     job = get_object_or_404(Job, id=pk)
     context = {'job': job}
     return render(request, 'jobs/job_detail.html', context)
+
+
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.utils import timezone
+from .models import Job, JobApplication
+from .forms import JobApplicationForm
+
+
+# -------------------------------
+# Helper Functions
+# -------------------------------
+
+def get_application_limit(user):
+    user_type = user.profile.user_type.lower().strip()
+
+    if user_type == "free":
+        return 20
+    elif user_type == "pro":
+        return 100
+    else:   # pro plus
+        return None   # unlimited
+
+
+def applications_this_month(user):
+    start_of_month = timezone.now().replace(
+        day=1, hour=0, minute=0, second=0, microsecond=0
+    )
+    return JobApplication.objects.filter(
+        user=user,
+        applied_at__gte=start_of_month
+    ).count()
+
+
+# -------------------------------
+# Apply Job View
+# -------------------------------
+
+def apply_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    user = request.user
+
+    user_type = user.profile.user_type.lower().strip()
+
+    limit = get_application_limit(user)
+    used = applications_this_month(user)
+
+    # 🚫 Restrict before form display
+    if limit is not None and used >= limit:
+        if user_type == "free":
+            msg = f"You've used {limit}/{limit} free applications this month. Upgrade to Pro for 100 applications/ month."
+        else:
+            msg = f"You've used {limit}/{limit} applications this month."
+
+        messages.error(request, msg)
+        return redirect('jobs:job_detail', pk=job.id)
+
+    # ---------------------------
+    # POST SUBMISSION
+    # ---------------------------
+    if request.method == "POST":
+        form = JobApplicationForm(request.POST, request.FILES)
+
+        if form.is_valid():
+
+            # 🔥 Secure double-check
+            limit = get_application_limit(user)
+            used = applications_this_month(user)
+
+            if limit is not None and used >= limit:
+                return redirect('jobs:job_detail', pk=job.id)
+
+            application = form.save(commit=False)
+            application.job = job
+            application.user = user
+            application.save()
+
+            used += 1
+
+            # ℹ️ Info when limit reached after submission
+            if limit is not None and used >= limit:
+                if user_type == "free":
+                    messages.info(
+                        request,
+                        f"You've used {limit}/{limit} free applications this month. Upgrade to Pro."
+                    )
+                else:
+                    messages.info(
+                        request,
+                        f"You've used {limit}/{limit} applications this month."
+                    )
+
+            #messages.success(request, "Application submitted successfully!")
+            return render(request, 'jobs/application_success.html', {'job': job})
+
+    else:
+        form = JobApplicationForm()
+
+    return render(request, 'jobs/job_apply.html', {
+        'job': job,
+        'form': form,
+        'used': used,
+        'limit': limit
+    })
+
+
+# -------------------------------
+# Upgrade View
+# -------------------------------
+
+def upgrade_to_pro(request):
+    profile = request.user.profile
+    profile.user_type = "Pro"
+    profile.save()
+
+    messages.success(
+        request,
+        "You have upgraded to Pro! Your application limit is now 100 per month."
+    )
+
+    return redirect('dashboard')
+
+
 
 
 

@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Main Container with padding to avoid fixed navbar -->
+<div class="container mt-5 pt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <!-- Page Header -->
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Book a Consultant Session</h2>
+                <p class="text-muted">Schedule a session with your consultant at your convenience.</p>
+            </div>
+
+            <!-- Flash Messages -->
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
+                            {% if message.tags == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            {% elif message.tags == 'warning' %}
+                                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                            {% elif message.tags == 'info' %}
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Quota Info -->
+            <div class="alert alert-warning rounded-3 text-center mb-4 shadow-sm">
+                <strong>Sessions Remaining:</strong>
+                {{ quota.remaining_sessions }}/{{ quota.total_sessions }}
+            </div>
+<!-- Pro Plus Perks -->
+{% if perks %}
+<div class="alert alert-info rounded-3 shadow-sm mb-4">
+    <strong>Pro Plus Perks:</strong>
+    <ul class="mb-0">
+        {% for perk in perks %}
+            <li>{{ perk }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+            <!-- Booking Card -->
+            <div class="card shadow-lg rounded-4 p-5 mb-4">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Session Topic</label>
+                        <input type="text" name="topic"
+                               class="form-control form-control-lg rounded-3"
+                               placeholder="Enter topic for your session"
+                               required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Session Date & Time</label>
+                        <input type="datetime-local" name="session_date"
+                               class="form-control form-control-lg rounded-3"
+                               required>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm">
+                            Schedule Session
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+
+
+
+            {% if user_type == "proplus" %}
+<div class="card shadow-lg border-0 rounded-4 mt-4">
+    <div class="card-body p-4">
+
+        <h5 class="fw-bold mb-4 text-center">
+            <i class="bi bi-camera-video me-2"></i>
+            Pro Plus Mock Interviews
+        </h5>
+
+        <!-- Row 1 -->
+        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-3 shadow-sm">
+            <div>
+                <h6 class="mb-1 fw-bold">Mock Interview 1</h6>
+                <small class="text-muted">Consultant-led interview with detailed feedback</small>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
+                View
+            </a>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-3 shadow-sm">
+            <div>
+                <h6 class="mb-1 fw-bold">Mock Interview 2</h6>
+                <small class="text-muted">Career mentoring & interview practice</small>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
+                View
+            </a>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 mb-3 shadow-sm">
+            <div>
+                <h6 class="mb-1 fw-bold">Mock Interview 3</h6>
+                <small class="text-muted">Performance evaluation session</small>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
+                View
+            </a>
+        </div>
+
+        <!-- Row 4 -->
+        <div class="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 shadow-sm">
+            <div>
+                <h6 class="mb-1 fw-bold">Mock Interview 4</h6>
+                <small class="text-muted">Advanced feedback & improvement plan</small>
+            </div>
+            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
+                View
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endif %}
+
+            <!-- View My Sessions Button -->
+            <div class="d-grid mt-4">
+               <a href="{% url 'pro_features:my_sessions_status' %}"
+   class="btn btn-outline-primary btn-lg rounded-3 shadow-sm">
+View Status</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+ /* Main Card */
+.mock-card{
+    background:#ffffff;
+    border-radius:18px;
+    padding:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.06);
+    margin-top:25px;
+}
+
+/* Title */
+.mock-title{
+    font-weight:700;
+    text-align:center;
+    margin-bottom:25px;
+    color:#2c3e50;
+}
+
+/* Row Layout */
+.mock-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px;
+    margin-bottom:15px;
+    border-radius:12px;
+    background:#f9fafb;
+    border:1px solid #ececec;
+    transition:all 0.25s ease;
+}
+
+/* Hover Effect */
+.mock-row:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 16px rgba(0,0,0,0.08);
+    background:#ffffff;
+}
+
+/* Text */
+.mock-info h6{
+    font-weight:600;
+    margin-bottom:4px;
+    color:#1f2937;
+}
+
+.mock-info p{
+    font-size:13px;
+    color:#6b7280;
+    margin:0;
+}
+
+/* Button */
+.mock-btn{
+    padding:8px 18px;
+    border-radius:8px;
+    background:#2563eb;
+    color:white;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:500;
+    transition:0.3s;
+}
+
+.mock-btn:hover{
+    background:#1d4ed8;
+    color:white;
+}
+
+
+</style>
+
+
+
+
+
+
+
+{% endblock %} 

@@ -245,3 +245,38 @@ class ConsultantMeeting(models.Model):
 
     def __str__(self):
         return f"Meeting: {self.consultant.username} with {self.application.user.username if self.application else 'N/A'}"
+
+
+
+from django.db import models
+from django.contrib.auth import get_user_model
+
+user = models.ForeignKey(
+    User,
+    on_delete=models.CASCADE,
+    related_name='accounts_sessions'
+)
+
+
+
+from django.db import models
+from django.contrib.auth import get_user_model
+
+user = models.ForeignKey(
+    User,
+    on_delete=models.CASCADE,
+    related_name='accounts_sessions'
+)
+
+class UserNotification(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='notifications'
+    )
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Notification for {self.user.username} - {self.message[:20]}"

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5 text-center">
+
+<div class="card shadow p-5">
+
+<h3 class="text-success">
+Your Session Has Been Scheduled
+</h3>
+
+<p class="mt-3">
+Your session is booked and waiting for consultant approval.
+</p>
+
+<hr>
+
+<p><strong>Topic:</strong> {{ session.topic }}</p>
+<p><strong>Date:</strong> {{ session.session_date }}</p>
+<p><strong>Status:</strong> {{ session.status }}</p>
+
+<div class="mt-4">
+<a href="#"
+   class="btn btn-primary">
+   View Status
+</a>
+</div>
+
+</div>
+</div>
+
+{% endblock %}

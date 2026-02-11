@@ -1,40 +1,85 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <div class="container py-5 mt-5">
   <h2 class="text-center fw-bold mb-2">Our IT Trainings</h2>
   <p class="text-center text-muted mb-5">Choose the best course to grow professionally</p>
 
+  {% if not is_pro_plus %}
+    <div class="alert alert-warning text-center">
+      Training is available only for <strong>Pro Plus</strong> users.
+    </div>
+  {% endif %}
+
   <div class="row g-4">
     {% for course in courses %}
-    <div class="col-md-4">
-      <div class="card training-card h-100 shadow-sm">
-        <div class="training-badge">
-          {% for f in course.feature_list %}
-            <span>✅ {{ f }}</span><br>
-          {% endfor %}
-        </div>
+      <div class="col-md-4 d-flex">
+        <div class="training-card shadow-sm w-100">
 
-        <img src="{{ course.image.url }}" class="card-img-top" alt="course">
+          <!-- Badges -->
+          <div class="card-badge">
+            {% if course.has_webinar %}
+              <span class="badge webinar">Live Webinar</span>
+            {% endif %}
+            {% if course.enrollment and course.enrollment.completed %}
+              <span class="badge completed">Completed</span>
+            {% endif %}
+          </div>
 
-        <div class="card-body text-center">
-          <h5 class="fw-bold">{{ course.title }}</h5>
-          <p class="text-success fw-semibold">⏱ {{ course.duration_days }} Days</p>
-          <h4 class="fw-bold text-dark">₹ {{ course.price }}</h4>
+          <!-- Image -->
+          <div class="card-image">
+            <img src="{{ course.image.url }}" alt="{{ course.title }}">
+          </div>
 
-          <div class="d-flex justify-content-center gap-2 mt-3">
-            {% if course.brochure %}
-              <a href="{{ course.brochure.url }}" class="btn btn-outline-success btn-sm">Download Brochure</a>
+          <!-- Card Body -->
+          <div class="card-body d-flex flex-column text-center">
+            <h5 class="course-title">{{ course.title }}</h5>
+            <p class="course-duration">⏱ {{ course.duration_days }} Days</p>
+            <h4 class="course-price">₹ {{ course.price }}</h4>
+
+            <!-- Features -->
+            <ul class="course-features list-unstyled mt-2 mb-3">
+              {% for f in course.feature_list %}
+                <li>✔ {{ f }}</li>
+              {% endfor %}
+            </ul>
+
+            <!-- Progress -->
+            {% if course.enrollment %}
+              <div class="progress-wrapper mb-3">
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" style="width: {{ course.enrollment.progress }}%;"></div>
+                </div>
+                <small class="progress-text">{{ course.enrollment.progress }}% completed</small>
+              </div>
+
+              {% if course.user_certificate %}
+                <a href="{{ course.user_certificate.file.url }}" class="btn btn-certificate btn-sm mb-2">
+                  Download Certificate
+                </a>
+              {% endif %}
             {% endif %}
 
-            {% if is_pro %}
-              <button class="btn btn-success btn-sm enroll-btn" data-id="{{ course.id }}">Enroll Now</button>
-            {% else %}
-              <button class="btn btn-success btn-sm" disabled>Enroll Now (Pro Only)</button>
-            {% endif %}
+            <!-- Buttons -->
+            <div class="d-flex flex-column gap-2 mt-auto">
+              {% if course.brochure %}
+                <a href="{{ course.brochure.url }}" class="btn btn-brochure btn-sm">Download Brochure</a>
+              {% endif %}
+
+              {% if is_pro_plus %}
+                {% if course.enrollment %}
+                  <button class="btn btn-enrolled btn-sm" disabled>Already Enrolled</button>
+                {% else %}
+                  <button class="btn btn-enroll btn-sm enroll-btn" data-id="{{ course.id }}">Enroll Now</button>
+                {% endif %}
+              {% else %}
+                <button class="btn btn-enroll btn-sm" disabled>Enroll Now (Pro Plus Only)</button>
+              {% endif %}
+            </div>
+
           </div>
         </div>
       </div>
-    </div>
     {% endfor %}
   </div>
 </div>
@@ -52,7 +97,11 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'X-CSRFToken': csrftoken }
         });
         const data = await response.json();
-        alert(data.message);
+        if (data.error) alert(data.error);
+        else {
+          alert(data.message);
+          location.reload();
+        }
       } catch(err) {
         console.error(err);
         alert("Error enrolling. Try again.");
@@ -63,53 +112,116 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
-
+/* ======================
+   Card Base
+====================== */
 .training-card {
-  border-radius: 16px;
+  border-radius: 20px;
   overflow: hidden;
-  border: 2px solid rgb(212, 212, 218);
-  transition: 0.3s ease;
-  background: white; /* light blue background */
-  color: #111827; /* text color */
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.3s, box-shadow 0.3s;
+  flex: 1 1 auto;
+  min-height: 520px; /* same height for all cards */
 }
 
 .training-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 30px rgba(0,0,0,0.12);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.25);
 }
 
-.training-badge {
-  background: white; /* slightly lighter blue */
-  color: black;
-  padding: 14px;
-  font-size: 13px;
-  font-weight: 500;
-  border-bottom: 1px solid #b0d4f0;
+/* ======================
+   Gradient Card
+====================== */
+.training-card {
+  background: linear-gradient(135deg,#4ade80,#06b6d4); /* Soft teal-blue gradient */
 }
 
-.training-card img {
-  height: 210px;
-  width: 100%;
-  object-fit: cover;
-  border-bottom: 1px solid #b0d4f0;
+/* ======================
+   Badges
+====================== */
+.card-badge {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
-.btn-success {
-  background-color: #16a34a;
-  border: none;
-  border-radius: 8px;
+.badge.webinar { background-color: #facc15; color: #111; font-weight: 600; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+.badge.completed { background-color: #22c55e; color: #fff; font-weight: 600; padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+
+/* ======================
+   Image
+====================== */
+.card-image img { width: 100%; height: 200px; object-fit: cover; border-bottom: 2px solid rgba(255,255,255,0.3); }
+
+/* ======================
+   Card Body
+====================== */
+.card-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+
+/* Titles */
+.course-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+.course-duration { font-size: 0.9rem; color: rgba(255,255,255,0.85); margin-bottom: 8px; }
+.course-price { font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+
+/* Features */
+.course-features li { font-size: 0.85rem; margin-bottom: 4px; }
+
+/* ======================
+   Progress Bar
+====================== 
+.progress-wrapper { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 12px; width: 100%; }
+.progress { background-color: rgba(255,255,255,0.3); border-radius: 12px; width: 100%; height: 12px; }
+.progress-bar { background-color: #fff; border-radius: 12px; }
+*/
+
+
+.btn-enroll { background-color: #346891; color: #111; border-radius: 12px; font-weight: 600; transition: all 0.3s; padding: 6px 12px; }
+.btn-enroll:hover { background-color: rgba(75, 99, 153, 0.85); }
+
+
+
+.btn-brochure { background-color: rgba(141, 39, 39, 0.6); color: #111; border-radius: 12px; font-weight: 600; padding: 6px 12px; transition: all 0.3s; }
+.btn-brochure:hover { background-color: rgba(255,255,255,0.85); }
+/*
+.btn-certificate { background-color: #fbbf24; color: #111; border-radius: 12px; font-weight: 600; padding: 6px 12px; transition: all 0.3s; }
+.btn-certificate:hover { background-color: #f59e0b; color: #fff; }
+*/
+
+
+
+/* Progress Bar Fill */
+.progress-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa); /* Slightly blue gradient */
+  border-radius: 12px;
 }
 
-.btn-outline-success {
-  border: 2px solid #16a34a;
-  color: #16a34a;
-  border-radius: 8px;
+/* Download Certificate Button */
+.btn-certificate {
+  background-color: #ac64a7; /* Cyan color */
+  color: #111;
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  transition: all 0.3s;
 }
 
-.btn-outline-success:hover {
-  background: #16a34a;
+.btn-certificate:hover {
+  background-color: #06b6d4;
   color: #fff;
 }
 
+
+.btn-enrolled { background-color: rgba(0,0,0,0.5); color: #fff; border-radius: 12px; font-weight: 600; padding: 6px 12px; }
+
+@media(max-width:768px){
+  .training-card { margin-bottom: 20px; min-height: auto; }
+}
 </style>
+
 {% endblock %}

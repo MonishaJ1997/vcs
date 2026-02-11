@@ -7,6 +7,9 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from accounts.models import HowItWorks
 from accounts.models import ServicePlan
+# accounts/views.py
+from pro_features.models import ConsultantSession  # Use the session from pro_features
+
 
 
 User = get_user_model()
@@ -35,25 +38,26 @@ from django.shortcuts import render
 from chatbot.models import ChatMessage  # if needed
 from .models import User  # your custom user
 from accounts.models import SiteSettings  # <-- IMPORT YOUR MODEL HERE
+from django.contrib.auth.decorators import login_required
 
+
+
+
+@login_required
 def dashboard(request):
-    # get latest site settings
-    settings = SiteSettings.objects.last()  # hero background image
-    return render(request, 'accounts/dashboard.html', {'settings': settings})
 
-
-def dashboard(request):
-      # latest 5 jobs
-    settings = SiteSettings.objects.last()  # hero background image
+    settings = SiteSettings.objects.last()
     steps = HowItWorks.objects.all()
     plans = Plan.objects.all()
-    
+
+    profile = request.user.profile
+    user_type = profile.user_type
 
     return render(request, 'accounts/dashboard.html', {
-       
         'settings': settings,
         'steps': steps,
-        'plans':plans
+        'plans': plans,
+        'user_type': user_type
     })
 
 
@@ -138,37 +142,28 @@ def payment_success(request, plan_type):
     plan = get_object_or_404(Plan, plan_type__iexact=plan_type)
     return render(request, 'accounts/success.html', {'plan': plan})
 
-
+# views.py
 from django.http import HttpResponse
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from datetime import datetime
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from .models import Plan  # or wherever your Plan model is
 
-@login_required
-def download_invoice(request):
-    user = request.user
-    plan_name = "Pro Plan"
-    amount = 1999
-    date = datetime.now().strftime("%d-%m-%Y")
+def download_invoice(request, plan_id):
+    plan = Plan.objects.get(id=plan_id)
 
-    invoice_content = f"""
-    VETRI CONSULTANCY SERVICES
-    --------------------------
-    Invoice Date: {date}
+    template_path = 'accounts/invoice_template.html'  # create this template
+    context = {'plan': plan}
 
-    Customer: {user.username}
-    Email: {user.email}
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Invoice_{plan.title}.pdf"'
 
-    Plan: {plan_name}
-    Amount Paid: ₹{amount}
-
-    Status: Paid
-
-    Thank you for choosing VCS!
-    """
-
-    response = HttpResponse(invoice_content, content_type='text/plain')
-    response['Content-Disposition'] = 'attachment; filename="VCS_Invoice.txt"'
+    template = get_template(template_path)
+    html = template.render(context)
+    
+    # create pdf
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('We had some errors <pre>' + html + '</pre>')
     return response
 
 
@@ -247,38 +242,91 @@ class ProfileAPIView(APIView):
         })
     
 
-
-
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib import messages
 from jobs.models import JobApplication
-from .models import ConsultantMeeting
-from .forms import ConsultantMeetingForm
+from .models import ConsultantMeeting, UserNotification
+from pro_features.models import ConsultantSession
 
-# Helper decorator to check if user is consultant
+
+# ✅ Consultant Role Check
 def consultant_required(user):
-    return user.is_authenticated and user.user_type == 'consultant'
+    return (
+        user.is_authenticated and
+        getattr(user, "user_type", "").lower() == "consultant"
+    )
 
 
+# ✅ Consultant Dashboard
 @login_required
 @user_passes_test(consultant_required)
 def consultant_dashboard(request):
-    """
-    Dashboard for consultants: show all job applications.
-    """
+
     applications = JobApplication.objects.all().order_by('-applied_at')
-    meetings = ConsultantMeeting.objects.filter(consultant=request.user).order_by('-scheduled_at')
+
+    # 🔥 OPTION 1 — Show ONLY this consultant sessions
+    sessions = ConsultantSession.objects.filter(
+        consultant=request.user
+    ).select_related('user').order_by('-session_date')
+
+    # 🔥 OPTION 2 — Show ALL sessions (if needed)
+    # sessions = ConsultantSession.objects.select_related(
+    #     'user', 'consultant'
+    # ).order_by('-session_date')
 
     context = {
         'applications': applications,
-        'meetings': meetings
+        'sessions': sessions
     }
+
     return render(request, 'accounts/consultant_dashboard.html', context)
 
 
+# ✅ Approve Session
+@login_required
+@user_passes_test(consultant_required)
+def approve_session(request, session_id):
+
+    session = get_object_or_404(
+        ConsultantSession,
+        id=session_id,
+        consultant=request.user
+    )
+
+    session.status = 'approved'
+    session.save()
+
+    UserNotification.objects.create(
+        user=session.user,
+        message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been approved."
+    )
+
+    messages.success(request, f"Session for {session.user.username} approved.")
+    return redirect('consultant_dashboard')
 
 
+# ✅ Cancel Session
+@login_required
+@user_passes_test(consultant_required)
+def delete_session(request, session_id):
+
+    session = get_object_or_404(
+        ConsultantSession,
+        id=session_id,
+        consultant=request.user
+    )
+
+    session.status = 'cancelled'
+    session.save()
+
+    UserNotification.objects.create(
+        user=session.user,
+        message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been cancelled."
+    )
+
+    messages.success(request, f"Session for {session.user.username} cancelled.")
+    return redirect('consultant_dashboard')
 
 
 
@@ -445,3 +493,6 @@ def payment_view(request):
         return redirect("dashboard")
 
     return render(request,"payment.html")
+
+
+

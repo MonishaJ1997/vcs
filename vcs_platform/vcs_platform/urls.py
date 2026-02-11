@@ -30,7 +30,9 @@ urlpatterns = [
     path('resumes/', include('resumes.urls')),
     path('training/', include('training.urls')),
     path('chatbot/', include('chatbot.urls')),
-    
+    path('pro_features/',include('pro_features.urls')),
+   
+
     
 
     # Redirect root to dashboard

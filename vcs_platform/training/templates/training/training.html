@@ -1,121 +1,119 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <div class="container py-5 mt-5">
-  <h2 class="text-center fw-bold mb-2">
-    Our IT Trainings
-  </h2>
-  <p class="text-center text-muted mb-5">
-    Choosing the best course will help you grow professionally
-  </p>
+  <h2 class="text-center fw-bold mb-2">Our IT Trainings</h2>
+  <p class="text-center text-muted mb-5">Choose the best course to grow professionally</p>
+
+  <!-- Warning for non-Pro Plus users -->
+  {% if not is_pro_plus %}
+    <div class="alert alert-warning text-center">
+      Training is available only for <strong>Pro Plus</strong> users.
+    </div>
+  {% endif %}
 
   <div class="row g-4">
     {% for course in courses %}
-    <div class="col-md-4">
-      <div class="card training-card h-100 shadow-sm">
-        
-        <div class="training-badge">
-          {% for f in course.feature_list %}
-            <span>✅ {{ f }}</span><br>
-          {% endfor %}
-        </div>
-
-        <img src="{{ course.image.url }}" class="card-img-top" alt="course">
-
-        <div class="card-body text-center">
-          <h5 class="fw-bold">{{ course.title }}</h5>
-
-          <p class="text-success fw-semibold">
-            ⏱ {{ course.duration_days }} Days
-          </p>
-
-          <h4 class="fw-bold text-dark">
-            ₹ {{ course.price }}
-          </h4>
-
-          <div class="d-flex justify-content-center gap-2 mt-3">
-            {% if course.brochure %}
-              <a href="{{ course.brochure.url }}" class="btn btn-outline-success btn-sm">
-                Download Brochure
-              </a>
+      <div class="col-md-4">
+        <div class="card training-card h-100 shadow-sm">
+          
+          <!-- Features & Webinar Badge -->
+          <div class="training-badge">
+            {% for f in course.feature_list %}
+              <span>✅ {{ f }}</span><br>
+            {% endfor %}
+            {% if course.has_webinar %}
+              <span class="badge bg-warning text-dark">Live Webinar Included</span>
             {% endif %}
-            <a href="#" class="btn btn-success btn-sm">
-              Know More
-            </a>
+          </div>
+
+          <!-- Course Image -->
+          <img src="{{ course.image.url }}" class="card-img-top" alt="{{ course.title }}">
+
+          <div class="card-body text-center">
+            <!-- Course Info -->
+            <h5 class="fw-bold">{{ course.title }}</h5>
+            <p class="text-success fw-semibold">⏱ {{ course.duration_days }} Days</p>
+            <h4 class="fw-bold text-dark">₹ {{ course.price }}</h4>
+
+            <!-- Progress Tracking & Certificate -->
+            {% if course.enrollment %}
+              <div class="mb-2">
+                Progress: {{ course.enrollment.progress }}%
+                {% if course.enrollment.completed %}
+                  <span class="badge bg-success">Completed</span>
+                  {% if course.user_certificate %}
+                    <div class="mt-1">
+                      <a href="{{ course.user_certificate.file.url }}" class="btn btn-outline-primary btn-sm">
+                        Download Certificate
+                      </a>
+                    </div>
+                  {% endif %}
+                {% endif %}
+              </div>
+            {% endif %}
+
+            <!-- Buttons: Brochure / Enroll / Already Enrolled -->
+            <div class="d-flex justify-content-center gap-2 mt-3">
+              {% if course.brochure %}
+                <a href="{{ course.brochure.url }}" class="btn btn-outline-success btn-sm">Download Brochure</a>
+              {% endif %}
+
+              {% if is_pro_plus %}
+                {% if course.enrollment %}
+                  <button class="btn btn-secondary btn-sm" disabled>Already Enrolled</button>
+                {% else %}
+                  <button class="btn btn-success btn-sm enroll-btn" data-id="{{ course.id }}">Enroll Now</button>
+                {% endif %}
+              {% else %}
+                <button class="btn btn-success btn-sm" disabled>Enroll Now (Pro Plus Only)</button>
+              {% endif %}
+            </div>
+
           </div>
         </div>
-
       </div>
-    </div>
     {% endfor %}
   </div>
 </div>
 
+<!-- AJAX Enroll Script -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const csrftoken = document.cookie.split('; ').find(row => row.startsWith('csrftoken')).split('=')[1];
 
+  document.querySelectorAll('.enroll-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const courseId = btn.dataset.id;
+      try {
+        const response = await fetch(`/training/enroll/${courseId}/`, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': csrftoken }
+        });
+        const data = await response.json();
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert(data.message);
+          location.reload(); // Refresh to show progress/enrolled state
+        }
+      } catch(err) {
+        console.error(err);
+        alert("Error enrolling. Try again.");
+      }
+    });
+  });
+});
+</script>
+
+<!-- Styles -->
 <style>
-  /*
-  .training-card {
-  border-radius: 16px;
-  transition: 0.3s ease;
-}
-
-.training-card:hover {
-  transform: translateY(-6px);
-}
-
-.training-badge {
-  background: #d1fae5;
-  color: #065f46;
-  font-size: 14px;
-  padding: 12px;
-  border-radius: 16px 16px 0 0;
-  text-align: left;
-}
-
-.training-card img {
-  height: 200px;
-  object-fit: cover;
-}
-
-.btn-success {
-  background-color: #16a34a;
-  border: none;
-}
-
-.btn-outline-success {
-  border-color: #16a34a;
-  color: #16a34a;
-}
-
-.btn-outline-success:hover {
-  background-color: #16a34a;
-  color: #fff;
-}
-*/
-
-/* ===== GLOBAL NAVBAR FIX ===== */
-
-/* change value based on your navbar height */
-:root {
-  --navbar-height: 90px;
-}
-
-body {
-  padding-top: var(--navbar-height);
-}
-
-/* optional: smooth layout */
-.main-content {
-  min-height: 100vh;
-}
-
-/* ===== TRAINING PAGE EXTRA POLISH ===== */
-
 .training-card {
   border-radius: 16px;
   overflow: hidden;
-  border: none;
+  border: 2px solid rgb(212, 212, 218);
   transition: 0.3s ease;
+  background: white;
+  color: #111827;
 }
 
 .training-card:hover {
@@ -124,23 +122,32 @@ body {
 }
 
 .training-badge {
-  background: #dcfce7;
-  color: #065f46;
+  background: white;
+  color: black;
   padding: 14px;
   font-size: 13px;
   font-weight: 500;
+  border-bottom: 1px solid #b0d4f0;
 }
 
 .training-card img {
   height: 210px;
   width: 100%;
   object-fit: cover;
+  border-bottom: 1px solid #b0d4f0;
 }
 
 .btn-success {
   background-color: #16a34a;
   border: none;
   border-radius: 8px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  border-radius: 8px;
+  color: white;
 }
 
 .btn-outline-success {
@@ -154,6 +161,15 @@ body {
   color: #fff;
 }
 
-</style>
-{% endblock %}
+.btn-outline-primary {
+  border: 2px solid #0d6efd;
+  color: #0d6efd;
+  border-radius: 8px;
+}
 
+.btn-outline-primary:hover {
+  background: #0d6efd;
+  color: #fff;
+}
+</style>
+{% endblock %} 

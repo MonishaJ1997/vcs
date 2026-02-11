@@ -1,0 +1,10 @@
+<h3>Your Certificates</h3>
+{% for cert in certificates %}
+  <div>
+    <strong>{{ cert.course.title }}</strong> -
+    <a href="{{ cert.file.url }}" class="btn btn-success btn-sm">Download</a>
+    (Issued on: {{ cert.issued_at|date:"d M Y" }})
+  </div>
+{% empty %}
+  <p>No certificates yet. Complete your courses to get one.</p>
+{% endfor %}

@@ -11,6 +11,19 @@
                 <div class="card-body p-4">
                     <h4 class="fw-bold mb-4">Apply for {{ job.title }}</h4>
 
+{% if limit %}
+    <div class="mb-3 p-3 bg-warning bg-opacity-10 border rounded">
+        <p class="mb-1">
+            You have used {{ used }} of {{ limit }} applications this month.
+        </p>
+        {% if used >= limit %}
+            <a href="{% url 'services' %}" class="btn btn-primary btn-sm mt-2">Upgrade to Pro</a>
+        {% endif %}
+    </div>
+{% endif %}
+
+
+
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 

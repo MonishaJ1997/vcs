@@ -36,10 +36,48 @@
     </div>
 </div>
 
+
+
+<!-- ================= APPLIED JOBS ================= -->
+<div class="container mt-5">
+    <h2 class="text-center mb-4 fw-bold">Jobs You Applied</h2>
+
+    <div class="row g-4">
+        {% for job in applied_jobs %}
+        <div class="col-md-6 col-lg-4">
+            <div class="job-card-modern card-applied p-4 h-100 d-flex flex-column justify-content-between">
+
+                <div class="mb-3">
+                    <h5 class="fw-bold">{{ job.title }}</h5>
+                    <p class="text-muted mb-1">{{ job.company }}</p>
+                    <p class="small text-secondary">
+                        {{ job.location }} • {{ job.experience }}
+                    </p>
+                </div>
+
+                <!-- Applied Badge -->
+                <div class="mt-auto text-center">
+                    <span class="badge bg-primary px-4 py-2 rounded-pill">
+                        Applied ✓
+                    </span>
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted">No applied jobs yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
 <style>
+    /*
 body { background:#f5f7fb; }
 
-/* JOB CARD BASE */
+
 .job-card-modern{
     border-radius:20px;
     border:1px solid #e5e7eb;
@@ -53,12 +91,12 @@ body { background:#f5f7fb; }
     box-shadow:0 12px 28px rgba(0,0,0,0.06);
 }
 
-/* BLUE BACKGROUND CARD */
+
 .card-blue{
     background:#e3f0fb;
 }
 
-/* APPLY BUTTON */
+
 .btn-success{
     background:#16a34a;
     border:none;
@@ -66,6 +104,122 @@ body { background:#f5f7fb; }
 .btn-success:hover{
     background:#13803d;
 }
+
+
+
+.card-applied{
+    background:#e9f7ef;
+    border:1px solid #c7e9d5;
+}
+*/
+
+
+body {
+    background: #f4f6f9;
+    
+    color: #1f2937;
+}
+
+/* ===================== CARD BASE ===================== */
+.job-card-modern {
+    border-radius: 16px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-left: 5px solid transparent;
+}
+
+.job-card-modern:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+}
+
+/* ===================== CARD TYPES ===================== */
+.card-blue {
+    border-left-color: #16a34a; /* Green accent */
+    background: #f0f9f4; /* Soft green tint */
+}
+
+.card-applied {
+    border-left-color: #2563eb; /* Blue accent */
+    background: #eff6ff; /* Soft blue tint */
+}
+
+/* ===================== JOB INFO ===================== */
+.job-card-modern h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #111827;
+}
+
+.job-card-modern p {
+    margin-bottom: 0.2rem;
+    font-size: 0.9rem;
+    color: #6b7280; /* muted grey */
+}
+
+.job-card-modern .small {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn-success {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 8px 28px;
+    border-radius: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #13803d, #15803d);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+/* ===================== APPLIED BADGE ===================== */
+.badge {
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 8px 24px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: #fff;
+}
+
+.badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 768px) {
+    .job-card-modern {
+        padding: 15px;
+    }
+
+    .btn-success, .badge {
+        padding: 6px 20px;
+        font-size: 0.85rem;
+    }
+}
 </style>
+
+
+
+
+
+
 
 {% endblock %}

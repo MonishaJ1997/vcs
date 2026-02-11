@@ -79,138 +79,56 @@
     </div>
 
     <!-- APPLICATIONS CARD -->
-    <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-success text-white fw-semibold">
-            Job Applications
-        </div>
-
-        <div class="card-body table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Job</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Resume</th>
-                        <th>Applied</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for app in applications %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td class="fw-semibold">{{ app.job.title }}</td>
-                        <td>{{ app.full_name }}</td>
-                        <td>{{ app.email }}</td>
-                        <td>{{ app.phone }}</td>
-
-                        <td>
-                            {% if app.resume %}
-                            <a href="{{ app.resume.url }}" target="_blank"
-                               class="btn btn-sm btn-outline-success">
-                               Download
-                            </a>
-                            {% else %}
-                            <span class="text-muted">No Resume</span>
-                            {% endif %}
-                        </td>
-
-                        <td>{{ app.applied_at|date:"d M Y" }}</td>
-
-                        <td>
-                            <a href="{% url 'schedule_meeting' app.id %}"
-                               class="btn btn-sm btn-primary">
-                               Schedule
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center py-4">
-                            No applications found.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <!-- SCHEDULED SESSIONS CARD -->
+<div class="card shadow-sm border-0 mt-5">
+    <div class="card-header bg-primary text-white fw-semibold">
+        Scheduled Sessions
     </div>
 
-
-    <!-- MEETINGS CARD -->
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white fw-semibold">
-            Scheduled Meetings
-        </div>
-
-        <div class="card-body table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Candidate</th>
-                        <th>Job</th>
-                        <th>Meeting Time</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for meeting in meetings %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-
-                        <td>
-                            {% if meeting.application %}
-                                {{ meeting.application.user.username }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if meeting.application %}
-                                {{ meeting.application.job.title }}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-
-                        <td>{{ meeting.scheduled_at|date:"d M Y H:i" }}</td>
-                        <td>{{ meeting.notes }}</td>
-
-                        <td>
-                            <a href="{% url 'edit_meeting' meeting.id %}"
-                               class="btn btn-warning btn-sm me-1">
-                               Edit
-                            </a>
-
-                            <a href="{% url 'delete_meeting' meeting.id %}"
-                               class="btn btn-danger btn-sm"
-                               onclick="return confirm('Cancel meeting?');">
-                               Cancel
-                            </a>
-                        </td>
-                    </tr>
-
-                    {% empty %}
-                    <tr>
-                        <td colspan="6" class="text-center py-4">
-                            No meetings scheduled.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
-        </div>
+    <div class="card-body table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>User Name</th>
+                    <th>Topic</th>
+                    <th>Session Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in sessions %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ session.user.get_full_name|default:session.user.username }}</td>
+                    <td>{{ session.topic }}</td>
+                    <td>{{ session.session_date|date:"D, d M Y H:i" }}</td>
+                    <td>
+                        {% if session.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif session.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif session.status == 'cancelled' %}
+                            <span class="badge bg-danger">Cancelled</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if session.status == 'pending' %}
+                            <a href="{% url 'approve_session' session.id %}" class="btn btn-success btn-sm me-1">Approve</a>
+                            <a href="{% url 'delete_session' session.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this session?');">Cancel</a>
+                        {% else %}
+                            <span class="text-muted">No actions</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-4">No sessions scheduled.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-
 </div>
 {% endblock %}
-

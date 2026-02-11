@@ -46,9 +46,37 @@ urlpatterns = [
     path('edit-meeting/<int:meeting_id>/', views.edit_meeting, name='edit_meeting'),
     path('delete-meeting/<int:meeting_id>/', views.delete_meeting, name='delete_meeting'),
    
+ 
 
 
+    path(
+        "consultant_dashboard/",
+        views.consultant_dashboard,
+        name="consultant_dashboard"
+    ),
+
+    path(
+        "approve-session/<int:session_id>/",
+        views.approve_session,
+        name="approve_session"
+    ),
+
+    path(
+        "delete-session/<int:session_id>/",
+        views.delete_session,
+        name="delete_session"
+    ),
+
+ 
+    # ...
+    path('download-invoice/<int:plan_id>/', views.download_invoice, name='download_invoice'),
 ]
+
+
+
+
+
+
 
 
 

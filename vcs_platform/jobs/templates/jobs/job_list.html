@@ -207,19 +207,19 @@ btn.html('<i class="bi bi-bookmark"></i>');
 
 <style>
 
-/* PAGE BG */
+/* PAGE BG 
 body{
 background:#f5f7fb;
 }
 
-/* SIDEBAR */
+
 .sidebar{
 background:#f6f7f9;
 border-radius:18px;
 border:1px solid #e5e7eb;
 }
 
-/* JOB CARD BASE */
+
 .job-card-modern{
 border-radius:20px;
 border:1px solid #e5e7eb;
@@ -233,7 +233,7 @@ transform:translateY(-5px);
 box-shadow:0 12px 28px rgba(0,0,0,0.06);
 }
 
-/* PASTEL COLORS */
+
 .card-peach{ background:#fde8d7; }
 .card-mint{ background:#dff3ee; }
 .card-lavender{ background:#ebe7fb; }
@@ -241,7 +241,7 @@ box-shadow:0 12px 28px rgba(0,0,0,0.06);
 .card-pink{ background:#fbe4ef; }
 .card-cream{ background:#fff4db; }
 
-/* APPLY BUTTON */
+
 .btn-dark{
 background:#000;
 border:none;
@@ -251,7 +251,7 @@ border:none;
 background:#333;
 }
 
-/* SAVE BUTTON */
+
 .save-job-btn{
 width:40px;
 height:40px;
@@ -261,13 +261,121 @@ justify-content:center;
 border-radius:50%;
 }
 
-/* MOBILE */
+
 @media(max-width:992px){
 .sidebar{
 margin-bottom:20px;
 }
 }
+*/
 
+
+
+
+body {
+    background: #f4f6f9;
+    
+    color: #1f2937;
+}
+
+/* ===================== SIDEBAR ===================== */
+.sidebar {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+    padding: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.sidebar h5 {
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* ===================== JOB CARD BASE ===================== */
+.job-card-modern {
+    border-radius: 16px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border-left: 5px solid transparent;
+}
+
+.job-card-modern:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+}
+
+/* ===================== CARD COLORS ===================== */
+.card-peach { border-left-color: #f97316; background: #fff2e5; }
+.card-mint { border-left-color: #10b981; background: #dff3ee; }
+.card-lavender { border-left-color: #8b5cf6; background: #f3eaff; }
+.card-blue { border-left-color: #3b82f6; background: #e3f0fb; }
+.card-pink { border-left-color: #ec4899; background: #ffe4f0; }
+.card-cream { border-left-color: #facc15; background: #fff9e5; }
+
+/* ===================== JOB INFO ===================== */
+.job-card-modern h5 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.job-card-modern p {
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+/* ===================== BUTTONS ===================== */
+.btn-dark {
+    background: linear-gradient(135deg, #111827, #374151);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    padding: 6px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-dark:hover {
+    background: linear-gradient(135deg, #1f2937, #4b5563);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.save-job-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: #f3f4f6;
+    transition: all 0.3s ease;
+}
+
+.save-job-btn:hover {
+    background: #e5e7eb;
+    transform: scale(1.1);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 992px) {
+    .sidebar {
+        margin-bottom: 20px;
+    }
+}
 </style>
+
+
+
+
 
 {% endblock %} 

@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'resumes',
     'chatbot',
     'training',
-    
+    'pro_features',
     'crispy_bootstrap4', 
      'rest_framework',
      'django.contrib.humanize',  

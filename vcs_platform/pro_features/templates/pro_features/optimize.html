@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <h3 class="fw-bold mb-4">AI Resume Optimization</h3>
+
+    <!-- QUOTA DISPLAY -->
+    <div class="alert alert-info">
+        Remaining Runs This Month :
+        <strong>{{ quota.remaining_runs }}/{{ quota.total_runs }}</strong>
+    </div>
+
+    <!-- FORM -->
+    <div class="card shadow-sm p-4">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Upload Resume</label>
+                <input type="file" name="resume" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Target Job Description</label>
+                <textarea name="job_description" class="form-control"
+                          rows="5" required></textarea>
+            </div>
+
+            <button class="btn btn-success">
+                Optimize Resume
+            </button>
+        </form>
+    </div>
+
+    <!-- RESULT -->
+    {% if suggestions %}
+    <div class="card mt-4 shadow-sm p-4">
+        <h5>AI Suggestions</h5>
+        <p>{{ suggestions }}</p>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

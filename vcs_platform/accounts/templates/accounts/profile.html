@@ -18,6 +18,8 @@
 
     <!-- Details -->
     <div class="profile-details">
+
+      <!-- USER TYPE -->
       <div class="detail-row">
         <span>User Type</span>
         <span class="badge {{ request.user.user_type }}">
@@ -25,15 +27,20 @@
         </span>
       </div>
 
-     <div class="detail-row">
-    <span>Subscription</span>
-    {% if request.user.profile.user_type == "pro" or request.user.pro_subscription_active %}
-        <span class="status active">Active</span>
-    {% else %}
-        <span class="status inactive">Not Active</span>
-    {% endif %}
-</div>
+      <!-- SUBSCRIPTION -->
+      <div class="detail-row">
+        <span>Subscription</span>
 
+       {% if request.user.profile.user_type == "pro_plus" or request.user.profile.user_type == "proplus" %}
+            <span class="status active">Pro Plus Active</span>
+
+        {% elif request.user.profile.user_type == "pro" %}
+            <span class="status active">Pro Active</span>
+
+        {% else %}
+            <span class="status inactive">Not Active</span>
+        {% endif %}
+      </div>
 
       <div class="detail-row">
         <span>WhatsApp</span>
@@ -44,18 +51,22 @@
         <span>Joined On</span>
         <span>{{ request.user.date_joined|date:"d M Y" }}</span>
       </div>
+
     </div>
 
     <!-- Actions -->
     <div class="profile-actions">
-      <a href="#" class="btn primary">
-        Edit Profile
-      </a>
+      <a href="#" class="btn primary">Edit Profile</a>
 
       {% if request.user.profile.user_type == "free" %}
-      <a href="/accounts/pro" class="btn upgrade">
-        Upgrade to Pro
-      </a>
+        <a href="/accounts/services" class="btn upgrade">
+          Upgrade to Pro / Pro Plus
+        </a>
+
+      {% elif request.user.profile.user_type == "pro" %}
+        <a href="/accounts/services" class="btn upgrade">
+          Upgrade to Pro Plus
+        </a>
       {% endif %}
     </div>
 
@@ -63,7 +74,6 @@
 </div>
 
 <style>
-  /* Profile Page */
 .profile-wrapper {
   min-height: 100vh;
   background: #f4f7fb;
@@ -82,7 +92,6 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* Header */
 .profile-header {
   display: flex;
   align-items: center;
@@ -103,17 +112,13 @@
   justify-content: center;
 }
 
-.profile-header h2 {
-  margin: 0;
-  font-size: 22px;
-}
+.profile-header h2 { margin: 0; font-size: 22px; }
 
 .profile-header .email {
   font-size: 14px;
   color: #6b7280;
 }
 
-/* Details */
 .profile-details {
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
@@ -127,11 +132,8 @@
   font-size: 15px;
 }
 
-.detail-row span:first-child {
-  color: #6b7280;
-}
+.detail-row span:first-child { color: #6b7280; }
 
-/* Badges */
 .badge {
   padding: 4px 10px;
   border-radius: 12px;
@@ -149,19 +151,15 @@
   color: #166534;
 }
 
-.status {
-  font-weight: 600;
+.badge.pro_plus {
+  background: #ede9fe;
+  color: #5b21b6;
 }
 
-.status.active {
-  color: #16a34a;
-}
+.status { font-weight: 600; }
+.status.active { color: #16a34a; }
+.status.inactive { color: #dc2626; }
 
-.status.inactive {
-  color: #dc2626;
-}
-
-/* Actions */
 .profile-actions {
   display: flex;
   gap: 12px;
@@ -178,24 +176,11 @@
   transition: 0.3s ease;
 }
 
-.btn.primary {
-  background: #2563eb;
-  color: #fff;
-}
+.btn.primary { background: #2563eb; color: #fff; }
+.btn.primary:hover { background: #1e40af; }
 
-.btn.primary:hover {
-  background: #1e40af;
-}
-
-.btn.upgrade {
-  background: #facc15;
-  color: #1f2933;
-}
-
-.btn.upgrade:hover {
-  background: #eab308;
-}
-
+.btn.upgrade { background: #facc15; color: #1f2933; }
+.btn.upgrade:hover { background: #eab308; }
 </style>
 
 {% endblock %}
