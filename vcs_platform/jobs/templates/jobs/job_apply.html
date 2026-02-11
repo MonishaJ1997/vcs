@@ -2,6 +2,7 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+<div class="job-apply-page">
 <div class="container mt-5 pt-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -76,101 +77,93 @@
         </div>
     </div>
 </div>
-
-
+</div>
 <style>
-/* Card styling */
-.card {
-    background-color: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+
+/* ===============================
+   JOB APPLY PAGE SCOPED STYLES
+   =============================== */
+
+.job-apply-page .card {
+    background-color:#ffffff;
+    border-radius:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.08);
 }
 
-/* Form input focus */
-.form-control:focus {
-    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
-    border-color: #2563eb;
+.job-apply-page .form-control:focus {
+    box-shadow:0 0 0 0.2rem rgba(37,99,235,0.25);
+    border-color:#2563eb;
 }
 
-/* Submit button */
-.btn-success {
-    background-color: #16a34a;
-    border: none;
-    font-weight: 600;
-    transition: 0.3s ease;
-    width: 300px;
-}
-.btn-success:hover {
-    background-color: #13832f;
+.job-apply-page .btn-success {
+    background-color:#16a34a;
+    border:none;
+    font-weight:600;
+    transition:0.3s ease;
+    width:300px;
 }
 
-/* Heading styling */
-h4 {
-    color: #111827;
+.job-apply-page .btn-success:hover {
+    background-color:#13832f;
 }
 
-/* Responsive spacing */
-@media (max-width: 576px) {
-    .card-body {
-        padding: 20px;
-    }
-    h4 {
-        font-size: 1.5rem;
-    }
+.job-apply-page h4 {
+    color:#111827;
 }
 
-/* Required field star */
-.form-label .text-danger {
-    font-weight: bold;
-    margin-left: 4px;
+.job-apply-page .form-label .text-danger {
+    font-weight:bold;
+    margin-left:4px;
 }
 
-/* Cover letter field outside card on small screens */
-@media (max-width: 576px) {
-   .cover-letter-wrapper {
-        margin-left: -15px;
-        margin-right: -15px;
-        padding: 15px;
-       
-     
-        margin-bottom: 20px;
-    }
-
-    .cover-letter-wrapper textarea {
-        min-height: 120px;
-    }
-}
-/* Make cover letter responsive */
-.cover-letter-wrapper {
-    
-    padding: 20px;
-    border-radius: 12px;
-    /*border: 1px solid #e5e7eb;*/
+.job-apply-page .cover-letter-wrapper {
+    padding:20px;
+    border-radius:12px;
 }
 
-.cover-letter-wrapper textarea {
-    width: 100% !important; /* full width */
-    min-height: 140px;       /* enough height for typing */
-    resize: vertical;        /* allow user to resize vertically */
-    padding: 10px;
-    border-radius: 8px;
-  
-    font-size: 14px;
+.job-apply-page .cover-letter-wrapper textarea {
+    width:100% !important;
+    min-height:140px;
+    resize:vertical;
+    padding:10px;
+    border-radius:8px;
+    font-size:14px;
 }
 
-/* Small screens adjustments */
-@media (max-width: 768px) {
-    .cover-letter-wrapper {
-       
-        padding: 15px;
-        margin-top: 15px;
-        border-radius: 12px;
-    }
+/* Mobile */
+@media (max-width:576px){
 
-    .cover-letter-wrapper textarea {
-        width: 100% !important; /* full width on small screens too */
-    }
+.job-apply-page .card-body{
+    padding:20px;
+}
+
+.job-apply-page h4{
+    font-size:1.5rem;
+}
+
+.job-apply-page .cover-letter-wrapper{
+    margin-left:-15px;
+    margin-right:-15px;
+    padding:15px;
+    margin-bottom:20px;
+}
+
+.job-apply-page .cover-letter-wrapper textarea{
+    min-height:120px;
+}
+}
+
+/* Tablet */
+@media (max-width:768px){
+
+.job-apply-page .cover-letter-wrapper{
+    padding:15px;
+    margin-top:15px;
+    border-radius:12px;
+}
+
 }
 
 </style>
+
 {% endblock %}

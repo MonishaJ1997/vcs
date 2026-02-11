@@ -1,217 +1,315 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<section class="payment-wrapper">
-  <div class="payment-container">
+<div class="checkout-wrapper">
 
-    <!-- LEFT : ORDER SUMMARY -->
-    <div class="order-summary">
-      <h3>Order Summary</h3>
+  <div class="checkout-container">
+
+    <!-- LEFT : PLAN SUMMARY -->
+    <div class="checkout-summary">
+
+      <h2>Plan Summary</h2>
 
       <div class="plan-box">
-        <h4>{{ plan.title }}</h4>
-        <p>{{ plan.description }}</p>
+        <h3>{{ plan.title }}</h3>
+        <p class="plan-desc">{{ plan.description }}</p>
 
-        <ul>
+        <ul class="features">
           {% for feature in plan.features.all %}
           <li>✔ {{ feature.text }}</li>
           {% endfor %}
         </ul>
 
-        <div class="price">
-          ₹ {{ plan.price }}
-          
+        <div class="price-section">
+          <span>Total</span>
+          <strong>₹ {{ plan.price }}</strong>
+        </div>
+
+        <div class="security-note">
+          🔒 Secure checkout • SSL Protected • PCI Compliant
         </div>
       </div>
+
     </div>
 
     <!-- RIGHT : PAYMENT -->
-    <div class="payment-box">
-      <h3>Payment Details</h3>
+    <div class="checkout-payment">
 
-      <form method="post" id="paymentForm">
-  {% csrf_token %}
+      <h2>Payment Details</h2>
 
-  <label>Card Holder Name</label>
-  <input type="text" name="card_name" placeholder="Enter name on card" required>
+      <form id="payment-form" method="POST">
+        {% csrf_token %}
 
-  <label>Card Number</label>
-  <input type="text" name="card_number" placeholder="1234 5678 9012 3456" required>
+        <label>Full Name</label>
+        <input id="cardholder-name" type="text" required>
 
-  <div class="row">
-    <div>
-      <label>Expiry</label>
-      <input type="text" name="expiry" placeholder="MM/YY" required>
-    </div>
-    <div>
-      <label>CVV</label>
-      <input type="password" name="cvv" placeholder="***" required>
-    </div>
-  </div>
+        
 
-        <!-- PAYMENT ICONS -->
-        <div class="payment-icons">
-          <img src="https://img.icons8.com/color/48/visa.png"/>
-          <img src="https://img.icons8.com/color/48/mastercard.png"/>
-          <img src="https://img.icons8.com/color/48/google-pay.png"/>
-          <img src="https://img.icons8.com/color/48/paytm.png"/>
-        </div>
+        <label>Country</label>
+        <select>
+          <option>India</option>
+          <option>United States</option>
+          <option>United Kingdom</option>
+          <option>Canada</option>
+        </select>
 
-        <button type="submit" class="pay-btn">
+        <label>Card Information</label>
+        <div id="card-element" class="card-box"></div>
+
+        <div id="card-errors" class="error"></div>
+
+        <button class="pay-btn">
           Pay ₹ {{ plan.price }}
         </button>
+
+        <div class="trust-row">
+          <span>🔒 Secure Payment</span>
+          <span>💳 Stripe Protected</span>
+        </div>
+
       </form>
 
     </div>
 
   </div>
-</section>
+
+</div>
+
+
+<!-- STRIPE -->
+<script src="https://js.stripe.com/v3/"></script>
 
 <script>
-document.getElementById("paymentForm").addEventListener("submit", function(e){
+var stripe = Stripe("{{ stripe_publishable_key }}");
+var elements = stripe.elements();
 
-    e.preventDefault(); // stop default submit
+var card = elements.create("card");
+card.mount("#card-element");
 
-    let card = document.querySelector("[name='card_number']").value.replace(/\s/g,'');
-    let cvv = document.querySelector("[name='cvv']").value;
-    let expiry = document.querySelector("[name='expiry']").value;
+card.on('change', function(event){
+    document.getElementById('card-errors').textContent =
+        event.error ? event.error.message : '';
+});
 
-    if(card.length !== 16 || isNaN(card)){
-        alert("Card number must be 16 digits");
+document.getElementById('payment-form').addEventListener('submit', async function(e){
+    e.preventDefault();
+
+    var name = document.getElementById('cardholder-name').value;
+
+    const {paymentIntent, error} =
+    await stripe.confirmCardPayment("{{ client_secret }}", {
+        payment_method:{
+            card:card,
+            billing_details:{ name:name }
+        }
+    });
+
+    if(error){
+        document.getElementById('card-errors').textContent = error.message;
         return;
     }
 
-    if(cvv.length !== 3 || isNaN(cvv)){
-        alert("CVV must be 3 digits");
-        return;
+    if(paymentIntent.status === "succeeded"){
+
+        // 🔥 SEND SUCCESS TO DJANGO VIEW
+        fetch(window.location.href,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "X-CSRFToken":"{{ csrf_token }}"
+            },
+            body:JSON.stringify({
+                payment_intent_id:paymentIntent.id
+            })
+        })
+        .then(res=>res.json())
+        .then(data=>{
+            if(data.status==="success"){
+                window.location.href="{% url 'payment_success' plan.plan_type %}";
+            }
+        });
     }
-
-    if(!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)){
-        alert("Invalid expiry format MM/YY");
-        return;
-    }
-
-    // SUCCESS MESSAGE
-    alert("✅ Payment Successful!");
-
-    // If you want Django POST after validation
-    this.submit();
 });
 </script>
 
+
+
 <style>
-/* PAGE */
-.payment-wrapper {
-    min-height: 100vh;
-    background: #e9f2ff;
-    padding-top: 110px;
+/* PAGE WRAPPER */
+.checkout-wrapper{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;   /* prevents navbar overlap */
+  background:#f4f7fb;
+  padding:120px 20px 60px;  /* top spacing for fixed navbar */
 }
 
 /* MAIN CONTAINER */
-.payment-container {
-    max-width: 1000px;
-    margin: auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+.checkout-container{
+  width:100%;
+  max-width:1100px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  background:white;
+  border-radius:20px;
+  box-shadow:0 25px 60px rgba(0,0,0,0.08);
+  overflow:hidden;
 }
 
-/* ORDER SUMMARY */
-.order-summary {
-    background: #2563eb;
-    color: white;
-    border-radius: 16px;
-    padding: 30px;
+/* LEFT PANEL */
+.checkout-summary{
+  background:linear-gradient(135deg,#1d4ed8,#2563eb);
+  color:white;
+  padding:45px;
 }
 
-.order-summary h3 {
-    margin-bottom: 15px;
+.checkout-summary h2{
+  font-size:26px;
+  font-weight:600;
 }
 
-.plan-box ul {
-    padding-left: 0;
-    list-style: none;
+.plan-box{
+  margin-top:25px;
 }
 
-.plan-box li {
-    margin-bottom: 8px;
+.plan-box h3{
+  font-size:22px;
+  margin-bottom:8px;
 }
 
-.price {
-    font-size: 28px;
-    font-weight: bold;
-    margin-top: 20px;
+.plan-desc{
+  opacity:0.9;
+  margin-bottom:20px;
+  line-height:1.5;
 }
 
-.price span {
-    font-size: 14px;
-    opacity: 0.8;
+.features{
+  list-style:none;
+  padding:0;
 }
 
-/* PAYMENT BOX */
-.payment-box {
-    background: white;
-    border-radius: 16px;
-    padding: 30px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+.features li{
+  margin-bottom:12px;
+  font-size:15px;
 }
 
-.payment-box h3 {
-    margin-bottom: 20px;
+.price-section{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:24px;
+  font-weight:bold;
+  margin-top:30px;
+  padding-top:20px;
+  border-top:1px solid rgba(255,255,255,0.25);
 }
 
-.payment-box label {
-    font-size: 14px;
-    margin-top: 12px;
-    display: block;
+.security-note{
+  margin-top:20px;
+  font-size:13px;
+  opacity:0.85;
 }
 
-.payment-box input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-top: 5px;
+/* RIGHT PANEL */
+.checkout-payment{
+  padding:45px;
 }
 
-.row {
-    display: flex;
-    gap: 10px;
+.checkout-payment h2{
+  font-size:24px;
+  margin-bottom:20px;
 }
 
-.row div {
-    width: 100%;
+.checkout-payment label{
+  display:block;
+  margin-top:18px;
+  font-size:14px;
+  font-weight:500;
 }
 
-/* ICONS */
-.payment-icons {
-    display: flex;
-    gap: 10px;
-    margin: 20px 0;
+.checkout-payment input,
+.checkout-payment select{
+  width:100%;
+  padding:13px;
+  border-radius:10px;
+  border:1px solid #e2e8f0;
+  margin-top:6px;
+  font-size:14px;
+  transition:0.2s;
+}
+
+.checkout-payment input:focus,
+.checkout-payment select:focus{
+  outline:none;
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,0.1);
+}
+
+/* STRIPE BOX */
+.card-box{
+  padding:15px;
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+  margin-top:6px;
+  background:#fafafa;
+}
+
+.error{
+  color:#dc2626;
+  margin-top:10px;
+  font-size:14px;
 }
 
 /* PAY BUTTON */
-.pay-btn {
-    width: 100%;
-    background: #1f8a70;
-    color: white;
-    border: none;
-    padding: 14px;
-    font-size: 16px;
-    border-radius: 30px;
-    cursor: pointer;
+.pay-btn{
+  width:100%;
+  margin-top:30px;
+  padding:15px;
+  border:none;
+  background:#16a34a;
+  color:white;
+  border-radius:40px;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s;
 }
 
-.pay-btn:hover {
-    background: #218838;
+.pay-btn:hover{
+  background:#15803d;
+  transform:translateY(-1px);
+}
+
+/* TRUST ROW */
+.trust-row{
+  margin-top:18px;
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  color:#64748b;
 }
 
 /* MOBILE */
-@media (max-width: 768px) {
-    .payment-container {
-        grid-template-columns: 1fr;
-    }
+@media(max-width:768px){
+
+  .checkout-wrapper{
+    padding:100px 15px 40px;
+  }
+
+  .checkout-container{
+    grid-template-columns:1fr;
+  }
+
+  .checkout-summary{
+    padding:30px;
+  }
+
+  .checkout-payment{
+    padding:30px;
+  }
 }
+
 
 </style>
 

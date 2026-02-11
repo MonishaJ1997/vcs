@@ -21,10 +21,10 @@ class ChatbotAskView(View):
     def post(self, request):
 
         # ---------------- USER TYPE ----------------
-        user_type = getattr(request.user, "user_type", "").lower()
+        user_type = getattr(request.user.profile, "user_type", "").lower()
 
         # 🚫 Block free users completely
-        if user_type not in ["pro", "pro_plus"]:
+        if user_type not in ["pro", "pro_plus", "proplus"]:
             return JsonResponse({
                 "answer": "🚫 Chatbot is available only for Pro and Pro Plus users."
             })

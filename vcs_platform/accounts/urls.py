@@ -4,15 +4,45 @@ from django.contrib.auth.views import LogoutView
 from . import views
 from django.urls import path, include
 
+from django.urls import path
+
+
 
 
 urlpatterns = [
     # Registration
     path('register/', views.register, name='register'),
 
-    # Login
-    #path('login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
-     # ✅ USE CUSTOM LOGIN
+   
+    # ... your other urls
+    path('password-reset/', 
+        auth_views.PasswordResetView.as_view(
+            template_name='accounts/password_reset.html'
+        ),
+        name='password_reset'
+    ),
+    path('password-reset/done/', 
+        auth_views.PasswordResetDoneView.as_view(
+            template_name='accounts/password_reset_done.html'
+        ),
+        name='password_reset_done'
+    ),
+    path('reset/<uidb64>/<token>/', 
+        auth_views.PasswordResetConfirmView.as_view(
+            template_name='accounts/password_reset_confirm.html'
+        ),
+        name='password_reset_confirm'
+    ),
+    path('reset/done/', 
+        auth_views.PasswordResetCompleteView.as_view(
+            template_name='accounts/password_reset_complete.html'
+        ),
+        name='password_reset_complete'
+    ),
+
+
+
+
     path('login/', views.login_view, name='login_view'),
 
     # Logout (allow GET and POST for convenience)
@@ -44,16 +74,10 @@ urlpatterns = [
     path('consultant_dashboard/', views.consultant_dashboard, name='consultant_dashboard'),
     path('schedule-meeting/<int:application_id>/', views.schedule_meeting, name='schedule_meeting'),
     path('edit-meeting/<int:meeting_id>/', views.edit_meeting, name='edit_meeting'),
-    path('delete-meeting/<int:meeting_id>/', views.delete_meeting, name='delete_meeting'),
    
  
 
 
-    path(
-        "consultant_dashboard/",
-        views.consultant_dashboard,
-        name="consultant_dashboard"
-    ),
 
     path(
         "approve-session/<int:session_id>/",
@@ -70,7 +94,15 @@ urlpatterns = [
  
     # ...
     path('download-invoice/<int:plan_id>/', views.download_invoice, name='download_invoice'),
+
+
 ]
+
+
+
+
+
+
 
 
 

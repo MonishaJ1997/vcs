@@ -17,7 +17,8 @@ from django.contrib.auth.decorators import login_required
 def training_catalog(request):
     profile = request.user.profile
     courses = TrainingCourse.objects.filter(is_active=True)
-    is_pro_plus = profile.user_type == 'pro_plus'
+    is_pro_plus = profile.user_type in ['pro_plus', 'proplus']
+
 
     # Attach enrollment and certificate
     for course in courses:
@@ -30,7 +31,8 @@ def training_catalog(request):
 
     return render(request, "training/training_catalog.html", {
         'courses': courses if is_pro_plus else [],
-        'is_pro_plus': is_pro_plus
+        'is_pro_plus': is_pro_plus,
+        
     })
 
 from .models import TrainingCourse, Enrollment

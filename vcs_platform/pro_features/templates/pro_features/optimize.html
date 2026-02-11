@@ -1,45 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container mt-5">
-    <h3 class="fw-bold mb-4">AI Resume Optimization</h3>
+<!-- Main container with padding to avoid fixed navbar -->
+<div class="container mt-5 pt-5">
 
-    <!-- QUOTA DISPLAY -->
-    <div class="alert alert-info">
-        Remaining Runs This Month :
-        <strong>{{ quota.remaining_runs }}/{{ quota.total_runs }}</strong>
+    <!-- Page Title -->
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">AI Resume Optimization</h3>
+        <p class="text-muted">Enhance your resume to match your target job description</p>
     </div>
 
-    <!-- FORM -->
-    <div class="card shadow-sm p-4">
+    <!-- QUOTA DISPLAY -->
+    <div class="alert alert-info text-center">
+        <strong>Remaining Runs This Month:</strong>
+        {{ quota.remaining_runs }}/{{ quota.total_runs }}
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card shadow-sm p-4 mb-4">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
 
+            <!-- Resume Upload -->
             <div class="mb-3">
-                <label class="form-label">Upload Resume</label>
+                <label class="form-label fw-semibold">Upload Resume</label>
                 <input type="file" name="resume" class="form-control" required>
             </div>
 
+            <!-- Target Job Description -->
             <div class="mb-3">
-                <label class="form-label">Target Job Description</label>
-                <textarea name="job_description" class="form-control"
-                          rows="5" required></textarea>
+                <label class="form-label fw-semibold">Target Job Description</label>
+                <textarea name="job_description" class="form-control" rows="5" placeholder="Paste the job description here..." required></textarea>
             </div>
 
-            <button class="btn btn-success">
-                Optimize Resume
-            </button>
+            <!-- Submit Button -->
+            <div class="d-grid">
+                <button type="submit" class="btn btn-success btn-lg">
+                    Optimize Resume
+                </button>
+            </div>
         </form>
     </div>
 
-    <!-- RESULT -->
+    <!-- RESULT CARD -->
     {% if suggestions %}
-    <div class="card mt-4 shadow-sm p-4">
-        <h5>AI Suggestions</h5>
-        <p>{{ suggestions }}</p>
+    <div class="card shadow-sm p-4">
+        <h5 class="fw-bold mb-3">AI Suggestions</h5>
+        <p class="mb-0">{{ suggestions|linebreaks }}</p>
     </div>
     {% endif %}
 
 </div>
+
+<!-- Optional: Extra bottom padding so result doesn't touch page bottom -->
+<div style="padding-bottom: 50px;"></div>
 
 {% endblock %}

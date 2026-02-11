@@ -88,61 +88,143 @@ def pro_plan(request):
     features = plan.features.all()
     return render(request, 'accounts/pro.html', {'plan': plan, 'features': features})
 
+import stripe
+import json
 
-
-
-
-from django.shortcuts import render, redirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Plan, Subscription
+from django.http import JsonResponse
 from django.contrib import messages
-from django.contrib import messages
-from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required
-from .models import Plan, Subscription
+from django.conf import settings
 
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import Plan, Subscription
+from .models import Plan, Subscription, Profile
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 @login_required
 def payment_page(request, plan_type):
-    # Get the plan dynamically based on the type
-    
 
-    # Convert 'proplus' in URL to 'pro_plus'
     plan_type_db = plan_type.replace("proplus", "pro_plus")
-    
-    plan = get_object_or_404(Plan, plan_type__iexact=plan_type_db)
 
+    plan = get_object_or_404(
+        Plan,
+        plan_type__iexact=plan_type_db
+    )
+
+    # ---------------------------
+    # AJAX POST AFTER STRIPE
+    # ---------------------------
     if request.method == "POST":
-        subscription, created = Subscription.objects.get_or_create(user=request.user)
 
-        subscription.amount_paid = plan.price
-        subscription.payment_status = True
-        subscription.plan = plan.plan_type  # store string
-        subscription.save()
+        print("🔥 POST HIT")
 
-        # Upgrade user type
-        if plan.plan_type.lower() == 'pro':
-            request.user.profile.user_type = "pro"
-        elif plan.plan_type.lower() == 'pro_plus':
-            request.user.profile.user_type = "proplus"
+        try:
+            data = json.loads(request.body)
+        except Exception:
+            return JsonResponse({"status": "bad_json"})
 
-        request.user.profile.save()
+        payment_intent_id = data.get("payment_intent_id")
+        print("🔥 Payment Intent:", payment_intent_id)
 
-        messages.success(request, f"✅ Payment successful! You are now a {plan.title} user.")
-        return redirect('payment_success', plan_type=plan.plan_type)
+        try:
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        except Exception as e:
+            print("❌ Stripe Error:", e)
+            return JsonResponse({"status": "failed"})
 
-    return render(request, 'accounts/payment.html', {'plan': plan})
+        print("🔥 Stripe Status:", intent.status)
+
+        if intent.status == "succeeded":
+
+            # ------------------
+            # SAVE SUBSCRIPTION
+            # ------------------
+            subscription, created = Subscription.objects.get_or_create(
+                user=request.user
+            )
+
+            subscription.plan = plan.plan_type
+            subscription.amount_paid = plan.price
+            subscription.payment_status = True
+            subscription.save()
+
+            # ------------------
+            # 🔥 PROFILE SAFE UPDATE
+            # ------------------
+            profile, created = Profile.objects.get_or_create(
+                user=request.user
+            )
+
+            print("🔥 BEFORE:", profile.user_type)
+
+            if plan.plan_type.lower() == "pro":
+                profile.user_type = "pro"
+
+            elif plan.plan_type.lower() == "pro_plus":
+                profile.user_type = "pro_plus"
+
+            profile.save()
+
+            print("🔥 AFTER:", profile.user_type)
+
+            return JsonResponse({"status": "success"})
+
+        return JsonResponse({"status": "failed"})
+
+    # ---------------------------
+    # CREATE PAYMENT INTENT
+    # ---------------------------
+    intent = stripe.PaymentIntent.create(
+        amount=int(float(plan.price) * 100),
+        currency="inr",
+        payment_method_types=["card"],
+        metadata={
+            "user_id": request.user.id,
+            "plan": plan.plan_type
+        }
+    )
+
+    return render(
+        request,
+        "accounts/payment.html",
+        {
+            "plan": plan,
+            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
+            "client_secret": intent.client_secret
+        }
+    )
+
 
 @login_required
 def payment_success(request, plan_type):
-    plan = get_object_or_404(Plan, plan_type__iexact=plan_type)
-    return render(request, 'accounts/success.html', {'plan': plan})
 
-# views.py
+    plan = get_object_or_404(
+        Plan,
+        plan_type__iexact=plan_type
+    )
+
+    messages.success(
+        request,
+        f"✅ Payment successful! You are now a {plan.title} user."
+    )
+
+    return render(
+        request,
+        "accounts/success.html",
+        {"plan": plan}
+    )
+
+
+
+
+
+
+
+
+
+
+
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
@@ -242,96 +324,113 @@ class ProfileAPIView(APIView):
         })
     
 
+
+
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
 from jobs.models import JobApplication
 from .models import ConsultantMeeting, UserNotification
 from pro_features.models import ConsultantSession
-
+from .forms import ConsultantMeetingForm
 
 # ✅ Consultant Role Check
 def consultant_required(user):
-    return (
-        user.is_authenticated and
-        getattr(user, "user_type", "").lower() == "consultant"
-    )
+    return user.is_authenticated and getattr(user, "user_type", "").lower() == "consultant"
 
 
 # ✅ Consultant Dashboard
 @login_required
 @user_passes_test(consultant_required)
 def consultant_dashboard(request):
-
     applications = JobApplication.objects.all().order_by('-applied_at')
 
-    # 🔥 OPTION 1 — Show ONLY this consultant sessions
-    sessions = ConsultantSession.objects.filter(
-        consultant=request.user
-    ).select_related('user').order_by('-session_date')
-
-    # 🔥 OPTION 2 — Show ALL sessions (if needed)
-    # sessions = ConsultantSession.objects.select_related(
-    #     'user', 'consultant'
-    # ).order_by('-session_date')
+    # Show all sessions (can filter to this consultant if needed)
+    sessions = ConsultantSession.objects.select_related('user', 'consultant').order_by('-session_date')
 
     context = {
         'applications': applications,
         'sessions': sessions
     }
-
     return render(request, 'accounts/consultant_dashboard.html', context)
 
-
-# ✅ Approve Session
 @login_required
 @user_passes_test(consultant_required)
 def approve_session(request, session_id):
+    # Get session safely without filtering by consultant
+    try:
+        session = ConsultantSession.objects.get(id=session_id)
+    except ConsultantSession.DoesNotExist:
+        messages.error(request, "No session found.")
+        return redirect("consultant_dashboard")
 
-    session = get_object_or_404(
-        ConsultantSession,
-        id=session_id,
-        consultant=request.user
-    )
+    if session.status != "approved":
+        session.status = "approved"
+        session.save()
 
-    session.status = 'approved'
-    session.save()
+        UserNotification.objects.create(
+            user=session.user,
+            message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been approved."
+        )
 
-    UserNotification.objects.create(
-        user=session.user,
-        message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been approved."
-    )
+        if session.user.email:
+            send_mail(
+                subject="✅ Your Consultant Session is Approved",
+                message=f"Hello {session.user.username},\n\n"
+                        f"Your session '{session.topic}' scheduled for "
+                        f"{session.session_date.strftime('%d %b %Y %H:%M')} has been APPROVED.\n\n"
+                        "Thank you,\nVetri Consultancy Services",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[session.user.email],
+                fail_silently=False
+            )
 
-    messages.success(request, f"Session for {session.user.username} approved.")
-    return redirect('consultant_dashboard')
+        #messages.success(request, f"Session for {session.user.username} approved and email sent.")
+    else:
+        messages.info(request, "This session is already approved.")
+
+    return redirect("consultant_dashboard")
 
 
-# ✅ Cancel Session
 @login_required
 @user_passes_test(consultant_required)
 def delete_session(request, session_id):
+    try:
+        session = ConsultantSession.objects.get(id=session_id)
+    except ConsultantSession.DoesNotExist:
+        messages.error(request, "No session found.")
+        return redirect("consultant_dashboard")
 
-    session = get_object_or_404(
-        ConsultantSession,
-        id=session_id,
-        consultant=request.user
-    )
+    if session.status != "cancelled":
+        session.status = "cancelled"
+        session.save()
 
-    session.status = 'cancelled'
-    session.save()
+        UserNotification.objects.create(
+            user=session.user,
+            message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been cancelled."
+        )
 
-    UserNotification.objects.create(
-        user=session.user,
-        message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been cancelled."
-    )
+        if session.user.email:
+            send_mail(
+                subject="❌ Your Consultant Session is Cancelled",
+                message=f"Hello {session.user.username},\n\n"
+                        f"Your session '{session.topic}' scheduled for "
+                        f"{session.session_date.strftime('%d %b %Y %H:%M')} has been CANCELLED by {request.user.username}.\n\n"
+                        "Please contact support or reschedule if needed.\n"
+                        "Thank you,\nVetri Consultancy Services",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[session.user.email],
+                fail_silently=False
+            )
 
-    messages.success(request, f"Session for {session.user.username} cancelled.")
-    return redirect('consultant_dashboard')
-
-
-
-
-
+        #messages.warning(request, f"Session for {session.user.username} cancelled and user notified via email.")
+    else:
+        messages.info(request, "This session is already cancelled.")
+    return redirect("consultant_dashboard")
 
 
 from django.contrib.auth import login, authenticate
@@ -390,35 +489,6 @@ def schedule_meeting(request, application_id=None):
         'form':form,
         'application':application
     })
-
-
-
-@login_required
-@user_passes_test(consultant_required)
-def delete_meeting(request, meeting_id):
-    meeting = get_object_or_404(ConsultantMeeting, id=meeting_id)
-
-    meeting.status = 'cancelled'
-    meeting.save()
-
-    return redirect('consultant_dashboard')
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-
-@login_required
-def delete_meeting(request, meeting_id):
-
-    meeting = get_object_or_404(
-        ConsultantMeeting,
-        id=meeting_id,
-        consultant=request.user   # security check
-    )
-
-    meeting.delete()
-
-    return redirect('consultant_dashboard')
-
 
 
 @login_required

@@ -95,6 +95,10 @@ DEFAULT_FROM_EMAIL = 'jkmonisha97@gmail.com'
 
 WSGI_APPLICATION = 'vcs_platform.wsgi.application'
 
+import os
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+
+# settings.py
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
