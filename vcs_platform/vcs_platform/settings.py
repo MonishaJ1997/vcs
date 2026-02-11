@@ -94,9 +94,17 @@ EMAIL_HOST_PASSWORD = 'desf oevw zmnk kjhx'
 DEFAULT_FROM_EMAIL = 'jkmonisha97@gmail.com'
 
 WSGI_APPLICATION = 'vcs_platform.wsgi.application'
-
 import os
-STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+from dotenv import load_dotenv
+
+# Load .env file
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Stripe keys
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
 
 # settings.py
 
