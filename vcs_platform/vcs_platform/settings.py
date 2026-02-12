@@ -94,6 +94,10 @@ EMAIL_HOST_PASSWORD = 'desf oevw zmnk kjhx'
 DEFAULT_FROM_EMAIL = 'jkmonisha97@gmail.com'
 
 WSGI_APPLICATION = 'vcs_platform.wsgi.application'
+
+
+
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -101,10 +105,12 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = os.getenv("DEBUG", "False") == "True"
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+# Get SECRET_KEY from env, or use a fallback for dev
+SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-temp-key-for-dev"
+
+
+# Stripe keys
+
 
 # settings.py
 

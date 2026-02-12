@@ -75,3 +75,44 @@ def save(self, *args, **kwargs):
 
     def __str__(self):
         return f"{self.user.username} - {self.topic}"
+
+
+
+
+
+
+
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
+
+INTERVIEW_TYPES = [
+    ('behavioral', 'Behavioral'),
+    ('technical', 'Technical'),
+    ('case_study', 'Case Study'),
+]
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    subscription_type = models.CharField(max_length=20, choices=[('free','Free'),('pro','Pro'),('pro_plus','Pro Plus')])
+    mock_interview_quota = models.IntegerField(default=4)  # monthly quota
+
+    def remaining_quota(self):
+        return self.mock_interview_quota
+
+class ConsultantSlot(models.Model):
+    consultant_name = models.CharField(max_length=100)
+    date = models.DateField()
+    time = models.TimeField()
+    is_booked = models.BooleanField(default=False)
+
+class MockInterview(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    consultant = models.ForeignKey(ConsultantSlot, on_delete=models.SET_NULL, null=True)
+    interview_type = models.CharField(max_length=20, choices=INTERVIEW_TYPES)
+    target_role = models.CharField(max_length=100, blank=True, null=True)
+    scheduled_at = models.DateTimeField(auto_now_add=True)
+    feedback_report = models.FileField(upload_to='feedback_reports/', null=True, blank=True)
+    completed = models.BooleanField(default=False)
+    canceled = models.BooleanField(default=False)
+

@@ -13,25 +13,33 @@
             </div>
 
             <!-- Flash Messages -->
-            {% if messages %}
-                <div class="mb-4">
-                    {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
-                            {% if message.tags == 'success' %}
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                            {% elif message.tags == 'error' or message.tags == 'danger' %}
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            {% elif message.tags == 'warning' %}
-                                <i class="bi bi-exclamation-circle-fill me-2"></i>
-                            {% elif message.tags == 'info' %}
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                            {% endif %}
-                            <span>{{ message }}</span>
-                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+    
+{% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+        {% if message.tags == "error" or message.tags == "danger" %}
+            <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {% elif message.tags == "success" %}
+            <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+        {% elif message.tags == "warning" %}
+            <div class="alert alert-warning alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+        {% elif message.tags == "info" %}
+            <div class="alert alert-info alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i>
+        {% else %}
+            <div class="alert alert-primary alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center" role="alert">
+                <i class="bi bi-bell-fill me-2"></i>
+        {% endif %}
+
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+    {% endfor %}
+</div>
+{% endif %}
 
             <!-- Quota Info -->
             <div class="alert alert-warning rounded-3 text-center mb-4 shadow-sm">
@@ -69,18 +77,17 @@
                                required>
                     </div>
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm">
-                            Schedule Session
-                        </button>
-                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+    <button type="submit" class="btn btn-primary btn-lg rounded-3 shadow-sm">
+        Schedule Session
+    </button>
+</div>
 
                 </form>
             </div>
 
 
-
-            {% if user_type == "proplus" %}
+{% if user_type == "proplus" or user_type == "pro_plus" %}
 <div class="card shadow-lg border-0 rounded-4 mt-4">
     <div class="card-body p-4">
 
@@ -95,9 +102,14 @@
                 <h6 class="mb-1 fw-bold">Mock Interview 1</h6>
                 <small class="text-muted">Consultant-led interview with detailed feedback</small>
             </div>
-            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
-                View
-            </a>
+ {% if "mock2" in booked_types %}
+<button class="btn btn-secondary" disabled>✅ Booked</button>
+{% else %}
+<a href="{% url 'pro_features:proplus_mock_interview' %}?type=mock2"
+   class="btn btn-primary">
+Book Now
+</a>
+{% endif %}
         </div>
 
         <!-- Row 2 -->
@@ -106,9 +118,14 @@
                 <h6 class="mb-1 fw-bold">Mock Interview 2</h6>
                 <small class="text-muted">Career mentoring & interview practice</small>
             </div>
-            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
-                View
-            </a>
+           {% if "mock2" in booked_types %}
+<button class="btn btn-secondary" disabled>✅ Booked</button>
+{% else %}
+<a href="{% url 'pro_features:proplus_mock_interview' %}?type=mock2"
+   class="btn btn-primary">
+Book Now
+</a>
+{% endif %}
         </div>
 
         <!-- Row 3 -->
@@ -117,9 +134,14 @@
                 <h6 class="mb-1 fw-bold">Mock Interview 3</h6>
                 <small class="text-muted">Performance evaluation session</small>
             </div>
-            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
-                View
-            </a>
+          {% if "mock3" in booked_types %}
+<button class="btn btn-secondary" disabled>✅ Booked</button>
+{% else %}
+<a href="{% url 'pro_features:proplus_mock_interview' %}?type=mock3"
+   class="btn btn-primary">
+Book Now
+</a>
+{% endif %}
         </div>
 
         <!-- Row 4 -->
@@ -128,21 +150,28 @@
                 <h6 class="mb-1 fw-bold">Mock Interview 4</h6>
                 <small class="text-muted">Advanced feedback & improvement plan</small>
             </div>
-            <a href="#" class="btn btn-primary btn-sm px-3 rounded-pill">
-                View
-            </a>
+          {% if "mock4" in booked_types %}
+<button class="btn btn-secondary" disabled>✅ Booked</button>
+{% else %}
+<a href="{% url 'pro_features:proplus_mock_interview' %}?type=mock4"
+   class="btn btn-primary">
+Book Now
+</a>
+{% endif %}
         </div>
 
     </div>
 </div>
 {% endif %}
 
-            <!-- View My Sessions Button -->
-            <div class="d-grid mt-4">
-               <a href="{% url 'pro_features:my_sessions_status' %}"
-   class="btn btn-outline-primary btn-lg rounded-3 shadow-sm">
-View Status</a>
-            </div>
+           <!-- View My Sessions Button -->
+<!-- View My Sessions Button -->
+<div class="d-flex justify-content-center mt-4">
+    <a href="{% url 'pro_features:my_sessions_status' %}"
+       class="btn btn-primary btn-sm rounded-3 shadow-sm">
+       View Status
+    </a>
+</div>
 
         </div>
     </div>

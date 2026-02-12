@@ -16,7 +16,13 @@ urlpatterns = [
         name="my_sessions_status"
     ),
 
+
+
+
+    path('mock-interview/', views.proplus_mock_interview, name='proplus_mock_interview'),
+    
 ]
+
 
 
 

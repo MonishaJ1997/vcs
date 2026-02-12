@@ -1,22 +1,42 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- Main container with padding to avoid fixed navbar -->
-<div class="container mt-5 pt-5">
+<!-- Main Container -->
+<div class="container" style="max-width: 600px; padding-top: 120px;">
 
-    <!-- Page Title -->
+    <!-- Page Header -->
     <div class="text-center mb-4">
         <h3 class="fw-bold">AI Resume Optimization</h3>
-        <p class="text-muted">Enhance your resume to match your target job description</p>
+        <p class="text-muted mb-0">Enhance your resume to match your target job description</p>
     </div>
 
-    <!-- QUOTA DISPLAY -->
-    <div class="alert alert-info text-center">
-        <strong>Remaining Runs This Month:</strong>
-        {{ quota.remaining_runs }}/{{ quota.total_runs }}
+    <!-- Flash Messages -->
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center py-2" role="alert">
+            {% if message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill me-2"></i>
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+            {% elif message.tags == 'info' %}
+                <i class="bi bi-info-circle-fill me-2"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Quota Display -->
+    <div class="alert alert-info text-center py-2 mb-4 rounded-3 shadow-sm">
+        <strong>Remaining Runs This Month:</strong> {{ quota.remaining_runs }}/{{ quota.total_runs }}
     </div>
 
-    <!-- FORM CARD -->
+    <!-- Form Card -->
     <div class="card shadow-sm p-4 mb-4">
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -24,27 +44,27 @@
             <!-- Resume Upload -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Upload Resume</label>
-                <input type="file" name="resume" class="form-control" required>
+                <input type="file" name="resume" class="form-control form-control-sm" required>
             </div>
 
             <!-- Target Job Description -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Target Job Description</label>
-                <textarea name="job_description" class="form-control" rows="5" placeholder="Paste the job description here..." required></textarea>
+                <textarea name="job_description" class="form-control form-control-sm" rows="5" placeholder="Paste the job description here..." required></textarea>
             </div>
 
             <!-- Submit Button -->
-            <div class="d-grid">
-                <button type="submit" class="btn btn-success btn-lg">
+            <div class="d-flex justify-content-center mt-3">
+                <button type="submit" class="btn btn-success btn-lg px-4 rounded-3 shadow-sm">
                     Optimize Resume
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- RESULT CARD -->
+    <!-- Result Card -->
     {% if suggestions %}
-    <div class="card shadow-sm p-4">
+    <div class="card shadow-sm p-4 mb-4">
         <h5 class="fw-bold mb-3">AI Suggestions</h5>
         <p class="mb-0">{{ suggestions|linebreaks }}</p>
     </div>
@@ -52,7 +72,7 @@
 
 </div>
 
-<!-- Optional: Extra bottom padding so result doesn't touch page bottom -->
-<div style="padding-bottom: 50px;"></div>
+<!-- Extra Bottom Padding -->
+<div style="padding-bottom: 40px;"></div>
 
 {% endblock %}
