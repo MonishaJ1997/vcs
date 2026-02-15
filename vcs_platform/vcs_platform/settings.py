@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'chatbot',
     'training',
     'pro_features',
+    'ai_chatbot',
+    'dashboard',
     'crispy_bootstrap4', 
      'rest_framework',
      'django.contrib.humanize',  
@@ -111,6 +113,11 @@ SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-temp-key-for-dev"
 
 # Stripe keys
 
+
+
+import os
+
+COHERE_API_KEY = os.environ.get("COHERE_API_KEY")
 
 # settings.py
 

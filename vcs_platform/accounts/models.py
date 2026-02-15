@@ -10,6 +10,7 @@ class User(AbstractUser):
         ('pro_plus', 'Pro Plus'),
         ('consultant', 'Consultant'),
         ('admin', 'Admin'),
+        ('trainee','Trainee'),
     )
 
     user_type = models.CharField(
@@ -35,6 +36,7 @@ class Profile(models.Model):
         ('pro_plus', 'Pro Plus User'),
         ('consultant', 'Consultant User'),
         ('admin', 'Admin User'),
+        ('trainee','Trainee User'),
     )
 
     user = models.OneToOneField(

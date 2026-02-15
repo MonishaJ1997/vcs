@@ -63,21 +63,22 @@
             <a class="nav-link {% if request.resolver_match.url_name == 'job_list' and request.resolver_match.namespace == 'jobs' %}active{% endif %}" href="{% url 'jobs:job_list' %}">Jobs</a>
           </li>
 
-          {% if user.profile.user_type == "pro_plus" or user.profile.user_type == "proplus" %}
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'training_catalog' %}active{% endif %}" href="{% url 'training_catalog' %}">Training</a>
-          </li>
-          {% endif %}
+          
 
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}" href="{% url 'services' %}">Services</a>
           </li>
-
+{% if user.profile.user_type == "pro_plus" or user.profile.user_type == "proplus" %}
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'training_catalog' %}active{% endif %}" href="{% url 'training_catalog' %}">Training</a>
+          </li>
+          {% endif %}
+          <!----
           {% if user.profile.user_type|lower != "free" %}
           <li class="nav-item">
             <a class="nav-link {% if request.resolver_match.url_name == 'chatbot' %}active{% endif %}" href="{% url 'chatbot-home' %}">Chatbot</a>
           </li>
-          {% endif %}
+          {% endif %}---->
 
           <!-- User Dropdown -->
           <li class="nav-item dropdown ms-lg-3">
@@ -112,6 +113,10 @@
           <!-- Login/Register -->
           <li class="nav-item ms-lg-3 d-flex gap-2">
             <a class="btn btn-light btn-sm fw-bold" href="{% url 'login' %}">Login</a>
+          <a href="{% url 'trainee_login' %}" 
+       class="btn btn-light btn-sm fw-bold">
+       Trainee Login
+    </a>
             <a class="btn btn-success btn-sm fw-bold" href="{% url 'register' %}">Register</a>
           </li>
         {% endif %}

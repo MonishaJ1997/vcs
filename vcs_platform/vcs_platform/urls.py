@@ -38,9 +38,11 @@ urlpatterns = [
     # Redirect root to dashboard
     path('', lambda request: redirect('accounts/dashboard')), 
     
-   path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('aichatbot/', include('ai_chatbot.urls')),
+    path('admin-dashboard/', include('dashboard.urls')),
 
     
 ]

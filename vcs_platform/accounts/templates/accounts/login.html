@@ -14,7 +14,13 @@
         <div class="card-body p-4">
 
           <h3 class="card-title text-center mb-4 fw-bold">Login to VCS</h3>
-
+   {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger text-center">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
           <form method="post" novalidate>
             {% csrf_token %}
             {{ form|crispy }}
@@ -32,7 +38,7 @@
 
           <div class="mt-1 text-center">
             <small>
-              <a href="{% url 'password_reset' %}">Forgot password?</a>
+              <a href="{% url 'password_resetform' %}">Forgot password?</a>
             </small>
           </div>
 

@@ -214,8 +214,3 @@ class ChatbotUploadResumeView(View):
             'user_type': user_type
         })
 
-
-from .permissions import is_pro_user
-import re
-from chatbot.models import CompanyInterviewQuestion, ChatConversation
-

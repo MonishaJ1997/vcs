@@ -7,30 +7,42 @@ from datetime import datetime
 
 @login_required
 def optimize_resume(request):
+    # Determine total runs based on user type
+    user_type_raw = request.user.profile.user_type
+    user_type = user_type_raw.lower().replace("_", "").replace(" ", "").strip()
 
+    # Pro users get 3 runs, ProPlus get 20
+    total_runs = 20 if user_type == "proplus" else 3
+
+    # Get or create quota
     quota, created = ResumeQuota.objects.get_or_create(
         user=request.user,
         defaults={
-            "total_runs": 3,
-            "remaining_runs": 3,
+            "total_runs": total_runs,
+            "remaining_runs": total_runs,
             "month": datetime.now().month
         }
     )
 
     # 🔥 Monthly reset
     if quota.month != datetime.now().month:
-        quota.remaining_runs = quota.total_runs
+        quota.remaining_runs = total_runs
         quota.month = datetime.now().month
+        quota.save()
+
+    # 🔥 Upgrade reset: If user upgraded to ProPlus, reset remaining_runs
+    if user_type == "proplus" and quota.total_runs != total_runs:
+        quota.total_runs = total_runs
+        quota.remaining_runs = total_runs
         quota.save()
 
     suggestions = None
 
     if quota.remaining_runs <= 0:
-        messages.error(request, "Quota exhausted upgrade to Pro Plus")
+        messages.error(request, "Quota exhausted. Upgrade to Pro Plus.")
         return redirect('dashboard')
 
     if request.method == "POST":
-
         resume = request.FILES.get('resume')
         jd = request.POST.get('job_description')
 
@@ -56,78 +68,57 @@ def optimize_resume(request):
     })
 
 
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from datetime import datetime
-from .models import ConsultantSession, ConsultantSessionQuota
-
 @login_required
 def schedule_session(request):
     user_type_raw = request.user.profile.user_type
     user_type = user_type_raw.lower().replace("_", "").replace(" ", "").strip()
 
+    now = datetime.now()
     perks = []
     mock_interview_info = None
-    scheduled_sessions = []
 
-    now = datetime.now()
+    # Determine total sessions
     total_sessions = 4 if user_type == "proplus" else 1
 
     # Get or create quota
     quota, created = ConsultantSessionQuota.objects.get_or_create(
         user=request.user,
         month=now.month,
-        defaults={"total_sessions": total_sessions, "remaining_sessions": total_sessions}
+        defaults={
+            "total_sessions": total_sessions,
+            "remaining_sessions": total_sessions
+        }
     )
 
-    # Calculate used sessions correctly
-    used_sessions = ConsultantSession.objects.filter(
-        user=request.user,
-        session_date__month=now.month
-    ).count()
+    # --- FORCE reset for upgrade ---
+    if user_type == "proplus":
+        # Reset quota if less than total_sessions
+        if quota.remaining_sessions < total_sessions or quota.total_sessions < total_sessions:
+            quota.total_sessions = total_sessions
+            quota.remaining_sessions = total_sessions
+            quota.save()
 
+    # Fetch perks for ProPlus
     if user_type == "proplus":
         perks = [
             "4 live consultant-led mock interviews per month with detailed feedback and improvement plans",
             "4 one-to-one career mentoring sessions (30 mins each) per month; SLA of 2 business hours for escalations"
         ]
 
-        # Update quota for new Pro Plus users or after upgrade
-        quota.total_sessions = total_sessions
-        quota.remaining_sessions = total_sessions - used_sessions
-        quota.save()
+    # Scheduled sessions (display only)
+    scheduled_sessions = ConsultantSession.objects.filter(
+        user=request.user,
+        session_date__month=now.month
+    ).order_by("session_date")
 
-        mock_interview_info = {
-            "total": total_sessions,
-            "used": used_sessions,
-            "remaining": quota.remaining_sessions
-        }
+    # Build mock info
+    mock_interview_info = {
+        "total": quota.total_sessions,
+        "used": quota.total_sessions - quota.remaining_sessions,
+        "remaining": quota.remaining_sessions
+    }
 
-        # Fetch scheduled sessions for this month
-        scheduled_sessions = ConsultantSession.objects.filter(
-            user=request.user,
-            session_date__month=now.month
-        ).order_by("session_date")
-
-    elif user_type == "pro":
-        quota.total_sessions = total_sessions
-        quota.remaining_sessions = total_sessions - used_sessions
-        quota.save()
-
-        scheduled_sessions = ConsultantSession.objects.filter(
-            user=request.user,
-            session_date__month=now.month
-        ).order_by("session_date")
-
-    elif user_type == "free":
-        messages.error(request, "Free users cannot book sessions. Upgrade to Pro or Pro Plus.")
-        return redirect("dashboard")
-    else:
-        messages.error(request, "Invalid user type.")
-        return redirect("dashboard")
-
-    # POST handling
+    # Handle POST booking
     if request.method == "POST":
         topic = request.POST.get("topic")
         session_date_input = request.POST.get("session_date")
@@ -146,7 +137,6 @@ def schedule_session(request):
                 messages.error(request, "Invalid date format. Please select a valid date and time.")
                 return redirect("pro_features:schedule_session")
 
-        # Create the session
         session = ConsultantSession.objects.create(
             user=request.user,
             topic=topic,
@@ -166,6 +156,11 @@ def schedule_session(request):
         "scheduled_sessions": scheduled_sessions,
         "user_type": user_type
     })
+
+
+
+
+
 @login_required
 def session_success(request, pk):
     """
@@ -193,12 +188,7 @@ def my_sessions_status(request):
         "pro_features/my_sessions_status.html",
         {"sessions": sessions}
     )
-
-
-
-
-
-
+    
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages

@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,171 +5,205 @@
     <meta charset="UTF-8">
     <title>Vetri Consultancy Services</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
 
-<style>
-    .card {
-    border-radius: 12px;
-}
-
-.card-header {
-    font-size: 18px;
-}
-
-.table th {
-    white-space: nowrap;
-}
-
-.table td {
-    vertical-align: middle;
-}
-
-</style>
-
-
-  </head>
-
+    <style>
+        .card { border-radius: 12px; }
+        .card-header { font-size: 18px; }
+        .table th { white-space: nowrap; }
+        .table td { vertical-align: middle; }
+        .badge { font-size: 0.85em; }
+    </style>
+</head>
 <body>
 
-
 <!-- NAVBAR -->
-<nav class="navbar navbar-expand-lg navbar-dark  fixed-top" style="background-color: #2563eb;">
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background-color: #2563eb;">
   <div class="container">
-
-    <!-- Brand -->
     <a class="navbar-brand fw-bold" href="{% url 'dashboard' %}">
       VCS <span class="fw-normal small">– Vetri Consultancy Services</span>
     </a>
-
-    <!-- Mobile toggle -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#vcsNav">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="vcsNav">
       <ul class="navbar-nav ms-auto align-items-lg-center">
-
-     
-
-
-        <!-- 🔓 LOGOUT -->
         <li class="nav-item ms-lg-2">
           <form method="post" action="{% url 'logout' %}">
             {% csrf_token %}
-            <button class="btn  btn-sm" style="background-color: green; color: white;">Logout</button>
+            <button class="btn btn-sm" style="background-color: green; color: white;">Logout</button>
           </form>
         </li>
-</ul>
+      </ul>
     </div>
   </div>
 </nav>
-   {% block content %}
+
+{% block content %}
+
 <div class="container-fluid mt-5 pt-4">
 
     <!-- PAGE TITLE -->
     <div class="mb-4">
         <h2 class="fw-bold">Consultant Dashboard</h2>
-        <p class="text-muted">Manage job applications and scheduled meetings</p>
+        <p class="text-muted">Manage sessions, job applications, and mock interviews</p>
     </div>
 
-    <!-- APPLICATIONS CARD -->
-  <!-- SCHEDULED SESSIONS CARD -->
-<div class="card shadow-sm border-0 mt-5">
-    <div class="card-header bg-primary text-white fw-semibold">
-        Scheduled Sessions
+    <!-- ================== Scheduled Sessions ================== -->
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-primary text-white fw-semibold">
+            Scheduled Sessions
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>User Name</th>
+                        <th>Topic</th>
+                        <th>Session Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ session.user.get_full_name|default:session.user.username }}</td>
+                        <td>{{ session.topic }}</td>
+                        <td>{% if session.session_date %}{{ session.session_date|date:"D, d M Y H:i" }}{% else %}-{% endif %}</td>
+                        <td>
+                            {% if session.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif session.status == 'approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif session.status == 'cancelled' %}
+                                <span class="badge bg-danger">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.status == 'pending' %}
+                                <a href="{% url 'approve_session' session.id %}" class="btn btn-success btn-sm me-1">Approve</a>
+                                <a href="{% url 'delete_session' session.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this session?');">Cancel</a>
+                            {% else %}
+                                <span class="text-muted">No actions</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">No sessions scheduled.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="card-body table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>User Name</th>
-                    <th>Topic</th>
-                    <th>Session Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for session in sessions %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ session.user.get_full_name|default:session.user.username }}</td>
-                    <td>{{ session.topic }}</td>
-                    <td>{{ session.session_date|date:"D, d M Y H:i" }}</td>
-                    <td>
-                        {% if session.status == 'pending' %}
-                            <span class="badge bg-warning text-dark">Pending</span>
-                        {% elif session.status == 'approved' %}
-                            <span class="badge bg-success">Approved</span>
-                        {% elif session.status == 'cancelled' %}
-                            <span class="badge bg-danger">Cancelled</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if session.status == 'pending' %}
-                            <a href="{% url 'approve_session' session.id %}" class="btn btn-success btn-sm me-1">Approve</a>
-                            <a href="{% url 'delete_session' session.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Cancel this session?');">Cancel</a>
-                        {% else %}
-                            <span class="text-muted">No actions</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center py-4">No sessions scheduled.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- ================== Job Applications ================== --
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-success text-white fw-semibold">
+            Job Applications
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>User</th>
+                        <th>Job</th>
+                        <th>Email</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ app.user.username }}</td>
+                        <td>{{ app.job.title }}</td>
+                        <td>{{ app.user.email }}</td>
+                        <td>{{ app.applied_at|date:"d M Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No applications</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <!-- ================== Mock Interviews ================== -->
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-info text-white fw-semibold">
+            Mock Interviews
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Consultant Slot</th>
+                        <th>User</th>
+                        <th>Interview Type</th>
+                        <th>Target Role</th>
+                        <th>Scheduled At</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in mock_interviews %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if item.consultant %}
+                                {{ item.consultant.consultant_name }} 
+                                ({{ item.consultant.date|date:"d M Y" }} {{ item.consultant.time|time:"H:i" }})
+                            {% else %}
+                                Not Assigned
+                            {% endif %}
+                        </td>
+                        <td>{% if item.user %}{{ item.user.username }}{% else %}-{% endif %}</td>
+                        <td>{{ item.interview_type|default:"-" }}</td>
+                        <td>{{ item.target_role|default:"-" }}</td>
+                        <td>{% if item.scheduled_at %}{{ item.scheduled_at|date:"d M Y H:i" }}{% else %}-{% endif %}</td>
+                        <td>
+                            {% if item.user %}
+                                {% if item.completed %}
+                                    <span class="badge bg-success">Completed</span>
+                                {% elif item.canceled %}
+                                    <span class="badge bg-danger">Canceled</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Booked</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="badge bg-primary">Available</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4">No mock interview slots available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
-
-
-
-
-<div class="card shadow-sm border-0 mt-5">
-    <div class="card-header bg-success text-white fw-semibold">
-        Job Applications
-    </div>
-
-    <div class="card-body table-responsive">
-        <table class="table table-hover align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>User</th>
-                    <th>Job</th>
-                    <th>Email</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for app in applications %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ app.user.username }}</td>
-                    <td>{{ app.job.title }}</td>
-                    <td>{{ app.user.email }}</td>
-                    <td>{{ app.applied_at|date:"d M Y" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No applications</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-
 
 {% endblock %}
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -49,8 +49,10 @@ def dashboard(request):
     settings = SiteSettings.objects.last()
     steps = HowItWorks.objects.all()
     plans = Plan.objects.all()
-
-    profile = request.user.profile
+    profile, _ = Profile.objects.get_or_create(
+        user=request.user
+    )
+    #profile = request.user.profile
     user_type = profile.user_type
 
     return render(request, 'accounts/dashboard.html', {
@@ -227,27 +229,46 @@ def payment_success(request, plan_type):
 
 from django.http import HttpResponse
 from django.template.loader import get_template
-from xhtml2pdf import pisa
-from .models import Plan  # or wherever your Plan model is
+from io import BytesIO
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
+from .models import Plan
 
 def download_invoice(request, plan_id):
     plan = Plan.objects.get(id=plan_id)
 
-    template_path = 'accounts/invoice_template.html'  # create this template
-    context = {'plan': plan}
+    # Create a BytesIO buffer
+    buffer = BytesIO()
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="Invoice_{plan.title}.pdf"'
+    # Create a canvas
+    c = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
 
-    template = get_template(template_path)
-    html = template.render(context)
+    # Add content to PDF
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(100, height - 100, f"Invoice for: {plan.title}")
+    c.setFont("Helvetica", 12)
+    c.drawString(100, height - 130, f"Plan Price: ${plan.price}")
+    # Example: show plan price instead
     
-    # create pdf
-    pisa_status = pisa.CreatePDF(html, dest=response)
-    if pisa_status.err:
-        return HttpResponse('We had some errors <pre>' + html + '</pre>')
-    return response
+    c.drawString(100, height - 180, f"Customer: {request.user.get_full_name()}")
 
+    # Add more details if needed
+    c.drawString(100, height - 210, "Thank you for your purchase!")
+
+    # Finalize the PDF
+    c.showPage()
+    c.save()
+
+    # Move buffer position to beginning
+    buffer.seek(0)
+
+    # Return response
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Invoice_{plan.title}.pdf"'
+    return response
+  # ✅ CORRECT
 
 
   # ✅ CORRECT
@@ -442,10 +463,16 @@ def login_view(request):
     if request.method == "POST":
         if form.is_valid():
             user = form.get_user()
+
+            if user.user_type == "trainee":
+                messages.error(request, "Trainees must login from the trainee login page.")
+                return redirect('login')
             login(request, user)
 
             if user.user_type == "consultant":
                 return redirect('consultant_dashboard')
+            elif user.user_type == "admin":
+                return redirect('admin_dashboard')
             else:
                 return redirect('dashboard')
 
@@ -564,5 +591,30 @@ def payment_view(request):
 
     return render(request,"payment.html")
 
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib import messages
 
+def trainee_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
 
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            if user.user_type == "trainee":
+
+                # 🔥 Automatically upgrade to pro_plus
+                user.profile.user_type = "pro_plus"
+                user.profile.save()
+
+                login(request, user)
+                return redirect("dashboard")   # or wherever you want
+
+            else:
+                messages.error(request, "Only trainees can login here.")
+        else:
+            messages.error(request, "Invalid username or password.")
+
+    return render(request, "accounts/trainee_login.html")

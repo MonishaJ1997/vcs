@@ -1,4 +1,3 @@
-
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
 from . import views
@@ -17,9 +16,9 @@ urlpatterns = [
     # ... your other urls
     path('password-reset/', 
         auth_views.PasswordResetView.as_view(
-            template_name='accounts/password_reset.html'
+            template_name='accounts/password_resetform.html'
         ),
-        name='password_reset'
+        name='password_resetform'
     ),
     path('password-reset/done/', 
         auth_views.PasswordResetDoneView.as_view(
@@ -44,7 +43,7 @@ urlpatterns = [
 
 
     path('login/', views.login_view, name='login_view'),
-
+     path('trainee_login/', views.trainee_login, name='trainee_login'),
     # Logout (allow GET and POST for convenience)
     path(
         'logout/',
@@ -94,27 +93,4 @@ urlpatterns = [
  
     # ...
     path('download-invoice/<int:plan_id>/', views.download_invoice, name='download_invoice'),
-
-
 ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

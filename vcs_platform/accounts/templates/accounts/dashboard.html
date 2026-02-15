@@ -221,8 +221,72 @@
   </div> <!-- End container -->
 </section>
 
+<!-- ================= AI CHATBOT ================= -->
+
+<!-- Floating Chat Icon -->
+<div id="chatbot-icon">💬</div>
+
+<!-- Popup -->
+<div id="chatbot-popup">
+
+    <div class="chat-header">
+        AI Career Assistant
+        <span id="close-chat">✖</span>
+    </div>
+
+    <div id="chat-body"></div>
+
+    <div class="chat-input">
+        <input type="text" id="user-message" placeholder="Ask your career questions..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+</div>
+<script>
+  
+
+document.getElementById("chatbot-icon").onclick = function(){
+    document.getElementById("chatbot-popup").style.display="flex";
+}
+
+document.getElementById("close-chat").onclick = function(){
+    document.getElementById("chatbot-popup").style.display="none";
+}
+
+function sendMessage(){
+
+    let input = document.getElementById("user-message");
+    let message = input.value;
+
+    if(message.trim()=="") return;
+
+    let chatBody = document.getElementById("chat-body");
+
+    chatBody.innerHTML += `<div><b>You:</b> ${message}</div>`;
+
+    fetch("/aichatbot/ai-chat/",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json",
+            "X-CSRFToken":"{{ csrf_token }}"
+        },
+        body:JSON.stringify({message:message})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        chatBody.innerHTML += `<div><b>AI:</b> ${data.reply}</div>`;
+        chatBody.scrollTop = chatBody.scrollHeight;
+    })
+    .catch(err=>{
+        chatBody.innerHTML += `<div><b>AI:</b> ⚠️ Error connecting AI</div>`;
+        console.log(err);
+    });
+
+    input.value="";
+}
 
 
+</script>
 <!-- Styles -->
 <style>
   /* Reset margins/padding to prevent image shifting */
@@ -586,6 +650,68 @@
 .service-card:hover{
   transform:translateY(-8px);
   box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+/* ===== CHATBOT ===== */
+
+#chatbot-icon{
+    position:fixed;
+    bottom:25px;
+    right:25px;
+    background:#2563eb;
+    color:white;
+    padding:15px;
+    border-radius:50%;
+    cursor:pointer;
+    font-size:22px;
+    z-index:9999;
+}
+
+#chatbot-popup{
+    position:fixed;
+    bottom:90px;
+    right:25px;
+    width:330px;
+    height:420px;
+    background:white;
+    border-radius:12px;
+    box-shadow:0 0 20px rgba(0,0,0,0.2);
+    display:none;
+    flex-direction:column;
+    z-index:9999;
+}
+
+.chat-header{
+    background:#2563eb;
+    color:white;
+    padding:12px;
+    font-weight:bold;
+    display:flex;
+    justify-content:space-between;
+}
+
+#chat-body{
+    flex:1;
+    padding:10px;
+    overflow-y:auto;
+    font-size:14px;
+}
+
+.chat-input{
+    display:flex;
+    border-top:1px solid #ddd;
+}
+
+.chat-input input{
+    flex:1;
+    border:none;
+    padding:10px;
+}
+
+.chat-input button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:10px 14px;
 }
 
 </style>
