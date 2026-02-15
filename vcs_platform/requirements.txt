@@ -1,40 +1,37 @@
-Django==5.1.6
-djangorestframework==3.15.2
-djangorestframework_simplejwt==5.3.1
-django-crispy-forms==2.1
-crispy-bootstrap4==2024.1
-django-cors-headers==4.4.0
+Django==6.0.1
+djangorestframework==3.16.1
+djangorestframework_simplejwt==5.5.1
+django-crispy-forms==2.5
+crispy-bootstrap4==2025.6
+django-cors-headers==4.9.0
 
 # Web server & static files
-gunicorn==22.0.0
-whitenoise==6.6.0
-python-dotenv==1.0.1
+gunicorn==25.0.3
+whitenoise==6.11.0
+python-dotenv==1.2.1
 
 # Requests & payment APIs
-requests==2.32.3
-stripe==10.11.0
-razorpay==1.4.2
+requests==2.32.5
+stripe==14.3.0
+razorpay==2.0.0
 
 # PDF / Images
-pillow==10.4.0
-reportlab==4.2.2
-pdfplumber==0.11.4
-pypdf==4.2.0
-pdfminer.six==20240706
-pypdfium2>=4.30.0
+pillow==12.1.0
+reportlab==4.4.4      # For generating PDF invoices
+pdfplumber==0.11.9
+PyPDF==6.7.0
+pdfminer.six==20251230
+pypdfium2>=5.4.0
 
 # Data / ML (optional)
-numpy==1.26.4
-
-joblib==1.4.2
-threadpoolctl==3.5.0
+numpy==2.4.2
+scikit-learn==1.8.0
+scipy==1.17.0
+joblib==1.5.3
+threadpoolctl==3.6.0
 
 # HTML / parsing
 html5lib==1.1
 
 # PostgreSQL
 psycopg2-binary==2.9.9
-
-cohere==5.20.5
-
-
