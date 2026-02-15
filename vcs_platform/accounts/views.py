@@ -99,11 +99,11 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.conf import settings
 import os
-
+import stripe
 from .models import Plan, Subscription, Profile
 
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
-
+stripe.api_key = STRIPE_SECRET_KEY
 
 
 @login_required
