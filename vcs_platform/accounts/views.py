@@ -90,21 +90,26 @@ def pro_plan(request):
     features = plan.features.all()
     return render(request, 'accounts/pro.html', {'plan': plan, 'features': features})
 
-import stripe
-import json
-
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.contrib import messages
-from django.conf import settings
 import os
-import stripe
-from .models import Plan, Subscription, Profile
+from pathlib import Path
+from dotenv import load_dotenv
 
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
-stripe.api_key = STRIPE_SECRET_KEY
+# Project base
+BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env only for local development
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Django secret key
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-temp-key-for-dev")
+
+# Stripe API keys
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
+# Validate Stripe keys
+if not STRIPE_SECRET_KEY or not STRIPE_PUBLISHABLE_KEY:
+    print("⚠️ Warning: STRIPE keys are missing! Check .env or Render env variables.")
 
 @login_required
 def payment_page(request, plan_type):
