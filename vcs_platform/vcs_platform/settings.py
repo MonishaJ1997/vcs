@@ -111,9 +111,13 @@ load_dotenv(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-temp-key-for-dev"
 
 import os
+from dotenv import load_dotenv
 
-STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
-STRIPE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY")
+load_dotenv()
+
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
 
 # Stripe keys
 
