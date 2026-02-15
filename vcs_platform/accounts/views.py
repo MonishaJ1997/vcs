@@ -101,7 +101,8 @@ from django.conf import settings
 
 from .models import Plan, Subscription, Profile
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")
+
 
 
 @login_required
