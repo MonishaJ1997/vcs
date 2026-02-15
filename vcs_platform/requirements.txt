@@ -25,8 +25,7 @@ pypdfium2>=4.30.0
 
 # Data / ML (optional)
 numpy==1.26.4
-scikit-learn==1.5.1
-scipy==1.13.1
+
 joblib==1.4.2
 threadpoolctl==3.5.0
 
@@ -37,4 +36,5 @@ html5lib==1.1
 psycopg2-binary==2.9.9
 
 cohere==5.20.5
+
 
