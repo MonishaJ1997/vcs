@@ -35,11 +35,6 @@ html5lib==1.1
 
 # PostgreSQL
 psycopg2-binary==2.9.9
-google-ai-generativelanguage==0.6.15
-google-api-core==2.29.0
-google-api-python-client==2.190.0
-google-auth==2.49.0.dev0
-google-auth-httplib2==0.3.0
-google-generativeai==0.8.6
-googleapis-common-protos==1.72.0
+
 cohere==5.20.5
+
