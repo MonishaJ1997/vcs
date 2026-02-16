@@ -101,6 +101,9 @@ from django.conf import settings
 
 from .models import Plan, Subscription, Profile
 
+if not settings.STRIPE_SECRET_KEY:
+    raise Exception("⚠️ STRIPE_SECRET_KEY is missing! Set it in .env or Render dashboard.")
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
@@ -382,7 +385,6 @@ def consultant_dashboard(request):
 @login_required
 @user_passes_test(consultant_required)
 def approve_session(request, session_id):
-    # Get session safely without filtering by consultant
     try:
         session = ConsultantSession.objects.get(id=session_id)
     except ConsultantSession.DoesNotExist:
@@ -390,12 +392,14 @@ def approve_session(request, session_id):
         return redirect("consultant_dashboard")
 
     if session.status != "approved":
+
         session.status = "approved"
         session.save()
 
         UserNotification.objects.create(
             user=session.user,
-            message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been approved."
+            message=f"Your session '{session.topic}' on "
+                    f"{session.session_date.strftime('%d %b %Y %H:%M')} has been approved."
         )
 
         if session.user.email:
@@ -403,18 +407,20 @@ def approve_session(request, session_id):
                 subject="✅ Your Consultant Session is Approved",
                 message=f"Hello {session.user.username},\n\n"
                         f"Your session '{session.topic}' scheduled for "
-                        f"{session.session_date.strftime('%d %b %Y %H:%M')} has been APPROVED.\n\n"
+                        f"{session.session_date.strftime('%d %b %Y %H:%M')} "
+                        f"has been APPROVED.\n\n"
                         "Thank you,\nVetri Consultancy Services",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[session.user.email],
                 fail_silently=False
             )
 
-        #messages.success(request, f"Session for {session.user.username} approved and email sent.")
     else:
         messages.info(request, "This session is already approved.")
 
     return redirect("consultant_dashboard")
+
+
 
 
 @login_required
@@ -427,12 +433,31 @@ def delete_session(request, session_id):
         return redirect("consultant_dashboard")
 
     if session.status != "cancelled":
+
+        # 🔥 ADD BACK QUOTA ONLY IF NOT ALREADY CANCELLED
+        from pro_features.models import ConsultantSessionQuota
+
+        try:
+            quota = ConsultantSessionQuota.objects.get(
+                user=session.user,
+                month=session.session_date.month
+            )
+
+            # Prevent exceeding total_sessions
+            if quota.remaining_sessions < quota.total_sessions:
+                quota.remaining_sessions += 1
+                quota.save()
+
+        except ConsultantSessionQuota.DoesNotExist:
+            pass  # safety fallback
+
         session.status = "cancelled"
         session.save()
 
         UserNotification.objects.create(
             user=session.user,
-            message=f"Your session '{session.topic}' on {session.session_date.strftime('%d %b %Y %H:%M')} has been cancelled."
+            message=f"Your session '{session.topic}' on "
+                    f"{session.session_date.strftime('%d %b %Y %H:%M')} has been cancelled."
         )
 
         if session.user.email:
@@ -440,7 +465,8 @@ def delete_session(request, session_id):
                 subject="❌ Your Consultant Session is Cancelled",
                 message=f"Hello {session.user.username},\n\n"
                         f"Your session '{session.topic}' scheduled for "
-                        f"{session.session_date.strftime('%d %b %Y %H:%M')} has been CANCELLED by {request.user.username}.\n\n"
+                        f"{session.session_date.strftime('%d %b %Y %H:%M')} "
+                        f"has been CANCELLED by {request.user.username}.\n\n"
                         "Please contact support or reschedule if needed.\n"
                         "Thank you,\nVetri Consultancy Services",
                 from_email=settings.DEFAULT_FROM_EMAIL,
@@ -448,9 +474,49 @@ def delete_session(request, session_id):
                 fail_silently=False
             )
 
-        #messages.warning(request, f"Session for {session.user.username} cancelled and user notified via email.")
     else:
         messages.info(request, "This session is already cancelled.")
+
+    return redirect("consultant_dashboard")
+
+
+
+
+from pro_features.models import ConsultantSessionQuota
+@login_required
+@user_passes_test(consultant_required)
+def update_session_status(request, session_id):
+
+    session = get_object_or_404(ConsultantSession, id=session_id)
+
+    new_status = request.POST.get("status")  # approved / rejected / cancelled
+    old_status = session.status
+
+    # Get correct month safely
+    month = session.session_date.month if session.session_date else datetime.now().month
+
+    try:
+        quota = ConsultantSessionQuota.objects.get(
+            user=session.user,
+            month=month
+        )
+    except ConsultantSessionQuota.DoesNotExist:
+        quota = None
+
+    # 🔥 If rejected or cancelled → Add quota back
+    if new_status in ["rejected", "cancelled"]:
+
+        if old_status not in ["rejected", "cancelled"] and quota:
+
+            if quota.remaining_sessions < quota.total_sessions:
+                quota.remaining_sessions += 1
+                quota.save()
+
+    # Approve → No change
+    session.status = new_status
+    session.save()
+
+    messages.success(request, f"Session marked as {new_status}.")
     return redirect("consultant_dashboard")
 
 

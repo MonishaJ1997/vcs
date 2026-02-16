@@ -38,13 +38,14 @@
 
     <!-- Form Card -->
     <div class="card shadow-sm p-4 mb-4">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data" action="{% url 'pro_features:optimize_resume' %}">
             {% csrf_token %}
 
             <!-- Resume Upload -->
             <div class="mb-3">
                 <label class="form-label fw-semibold">Upload Resume</label>
                 <input type="file" name="resume" class="form-control form-control-sm" required>
+                <small class="text-muted">Accepted formats: .txt, .pdf</small>
             </div>
 
             <!-- Target Job Description -->
@@ -62,7 +63,7 @@
         </form>
     </div>
 
-    <!-- Result Card -->
+    <!-- AI Suggestions Card -->
     {% if suggestions %}
     <div class="card shadow-sm p-4 mb-4">
         <h5 class="fw-bold mb-3">AI Suggestions</h5>

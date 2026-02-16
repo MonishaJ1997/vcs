@@ -100,18 +100,36 @@ WSGI_APPLICATION = 'vcs_platform.wsgi.application'
 
 
 
+#import os
+#from pathlib import Path
+##BASE_DIR = Path(__file__).resolve().parent.parent
+#load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Get SECRET_KEY from env, or use a fallback for dev#
+# SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-temp-key-for-dev"
+
+
+# Stripe keys  
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Project base
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env only for local development
 load_dotenv(os.path.join(BASE_DIR, '.env'))
 
-# Get SECRET_KEY from env, or use a fallback for dev
-SECRET_KEY = os.getenv("SECRET_KEY") or "django-insecure-temp-key-for-dev"
+# Django secret key
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-temp-key-for-dev")
 
+# Stripe API keys
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
-# Stripe keys
+# Validate Stripe keys
+if not STRIPE_SECRET_KEY or not STRIPE_PUBLISHABLE_KEY:
+    print("⚠️ Warning: STRIPE keys are missing! Check .env or Render env variables.")
 
 
 
