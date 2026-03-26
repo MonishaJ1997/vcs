@@ -1,23 +1,44 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from .models import Profile
+import re
 
-User = get_user_model()  # ← this gets the actual user model class
+User = get_user_model()
 
-class RegistrationForm(UserCreationForm):
+class RegistrationForm(forms.ModelForm):
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'placeholder': 'Password'})
+    )
+
     class Meta:
-        model = User  # ✅ use the model class, not string
-        fields = ('username', 'email', 'password1', 'password2')
+        model = User
+        fields = ['username', 'email', 'password']
+        widgets = {
+            'username': forms.TextInput(attrs={'placeholder': 'Name'}),
+            'email': forms.EmailInput(attrs={'placeholder': 'Email'}),
+        }
+
+    # ✅ Name validation (only letters)
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if not re.match(r'^[A-Za-z ]+$', username):
+            raise forms.ValidationError("Name should contain only letters")
+        return username
+
+    # ✅ Email validation
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already exists")
+        return email
 
     def save(self, commit=True):
-        user = super().save(commit=commit)
-        # Create profile automatically
-        Profile.objects.create(user=user)
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password'])
+        if commit:
+            user.save()
+            Profile.objects.create(user=user)
         return user
-
-
-
 
 
 
@@ -41,6 +62,12 @@ class ConsultantMeetingForm(forms.ModelForm):
 
 
 
+
+
+
+
+
+
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import get_user_model
@@ -49,9 +76,15 @@ User = get_user_model()
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
-        widget=forms.TextInput(attrs={'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Name',
+            'class': 'form-control'
+        })
     )
 
     password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+        widget=forms.PasswordInput(attrs={
+            'placeholder': 'Password',
+            'class': 'form-control'
+        })
     )

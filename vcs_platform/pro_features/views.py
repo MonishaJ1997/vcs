@@ -1,21 +1,23 @@
 import os
+import re
 from datetime import datetime
-from django.shortcuts import render, redirect
+
+import cohere
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-import cohere
-# pro_features/views.py
-from .models import ResumeQuota, ResumeOptimization, ConsultantSessionQuota, ConsultantSession
+from django.shortcuts import render, redirect
 
 from .models import ResumeQuota, ResumeOptimization
 
-@login_required
+
+@login_required(login_url="/login/")
 def optimize_resume(request):
     """
     Resume optimization using Cohere Chat API.
-    Outputs structured suggestions: Keywords, Formatting, Content.
+    Clean structured output (no markdown symbols).
     """
-    # Load Cohere API key
+
+    # ✅ Load API Key
     COHERE_API_KEY = os.getenv("COHERE_API_KEY")
     if not COHERE_API_KEY:
         messages.error(request, "Cohere API key missing. Contact admin.")
@@ -23,89 +25,149 @@ def optimize_resume(request):
 
     co = cohere.Client(COHERE_API_KEY)
 
-    # Determine user type and quota
-    user_type_raw = request.user.profile.user_type
+    # ✅ SAFE profile access (fixed hidden bug)
+    profile = getattr(request.user, "profile", None)
+    user_type_raw = getattr(profile, "user_type", "free")
+
     user_type = user_type_raw.lower().replace("_", "").replace(" ", "").strip()
+
     total_runs = 20 if user_type == "proplus" else 3
 
+    # ✅ Get/Create quota
     quota, _ = ResumeQuota.objects.get_or_create(
         user=request.user,
-        defaults={"total_runs": total_runs, "remaining_runs": total_runs, "month": datetime.now().month}
+        defaults={
+            "total_runs": total_runs,
+            "remaining_runs": total_runs,
+            "month": datetime.now().month
+        }
     )
 
-    # Monthly reset
+    # ✅ Monthly reset
     if quota.month != datetime.now().month:
+        quota.total_runs = total_runs
         quota.remaining_runs = total_runs
         quota.month = datetime.now().month
         quota.save()
 
-    # Upgrade reset
-    if user_type == "proplus" and quota.total_runs != total_runs:
+    # ✅ Upgrade reset
+    if quota.total_runs != total_runs:
         quota.total_runs = total_runs
         quota.remaining_runs = total_runs
         quota.save()
 
     suggestions = None
 
+    # ❌ No quota
     if quota.remaining_runs <= 0:
         messages.error(request, "Quota exhausted. Upgrade to Pro Plus.")
-        return redirect("pro_features:optimize_resume")
+        return render(request, "pro_features/optimize.html", {
+            "quota": quota,
+            "suggestions": None
+        })
 
+    # ✅ Handle POST
     if request.method == "POST":
         resume_file = request.FILES.get("resume")
         job_description = request.POST.get("job_description")
 
         if not resume_file or not job_description:
             messages.error(request, "Please upload resume and enter job description.")
-            return redirect("pro_features:optimize_resume")
+            return render(request, "pro_features/optimize.html", {
+                "quota": quota,
+                "suggestions": None
+            })
 
-        # Read resume text
+        # ✅ Extract resume text
         resume_text = ""
+
         try:
             if resume_file.name.endswith(".txt"):
                 resume_text = resume_file.read().decode("utf-8")
+
             elif resume_file.name.endswith(".pdf"):
                 import PyPDF2
                 reader = PyPDF2.PdfReader(resume_file)
+
                 for page in reader.pages:
-                    resume_text += page.extract_text() + "\n"
+                    text = page.extract_text()
+                    if text:
+                        resume_text += text + "\n"
+
             else:
                 messages.error(request, "Unsupported file format. Upload .txt or .pdf")
-                return redirect("pro_features:optimize_resume")
+                return render(request, "pro_features/optimize.html", {
+                    "quota": quota,
+                    "suggestions": None
+                })
+
         except Exception as e:
             messages.error(request, f"Error reading resume: {str(e)}")
-            return redirect("pro_features:optimize_resume")
+            return render(request, "pro_features/optimize.html", {
+                "quota": quota,
+                "suggestions": None
+            })
 
-        # Build structured AI prompt
+        # ❌ Empty resume
+        if not resume_text.strip():
+            messages.error(request, "Could not extract text from resume.")
+            return render(request, "pro_features/optimize.html", {
+                "quota": quota,
+                "suggestions": None
+            })
+
+        # ✅ Clean Prompt
         prompt = f"""
-You are an expert career coach and resume writer. Analyze the resume and target job description below.
-Provide **structured suggestions** in three sections:
+You are an expert resume writer.
 
-1. Keywords to Add
-2. Formatting Improvements
-3. Content / Summary Enhancements
+Analyze the resume and job description.
+
+IMPORTANT:
+- Do NOT use markdown
+- Do NOT use ** or symbols
+- Use clean plain text only
+
+Format EXACTLY like this:
+
+Keywords to Add:
+- point
+- point
+
+Formatting Improvements:
+- point
+- point
+
+Content / Summary Enhancements:
+- point
+- point
 
 Resume:
 {resume_text}
 
 Job Description:
 {job_description}
-
-Respond only in these three sections, use bullets where applicable, and make it professional.
 """
 
-        # Call Cohere Chat API (SDK version using 'message=')
+        # ✅ Call Cohere API
         try:
             response = co.chat(
-                model="command-a-03-2025",   # latest recommended model
+                model="command-a-03-2025",
                 message=prompt
             )
+
             suggestions = response.text.strip()
+
+            suggestions = re.sub(r"\*\*(.*?)\*\*", r"\1", suggestions)
+            suggestions = re.sub(r"#+", "", suggestions)
+
         except Exception as e:
             messages.error(request, f"AI error: {str(e)}")
-            return redirect("pro_features:optimize_resume")
+            return render(request, "pro_features/optimize.html", {
+                "quota": quota,
+                "suggestions": None
+            })
 
-        # Save optimization record
+        # ✅ Save record
         ResumeOptimization.objects.create(
             user=request.user,
             resume=resume_file,
@@ -113,12 +175,13 @@ Respond only in these three sections, use bullets where applicable, and make it 
             suggestions=suggestions
         )
 
-        # Deduct quota
+        # ✅ Deduct quota
         quota.remaining_runs -= 1
         quota.save()
 
         messages.success(request, "Resume optimized successfully!")
 
+    # ✅ Render page
     return render(request, "pro_features/optimize.html", {
         "quota": quota,
         "suggestions": suggestions
@@ -403,3 +466,7 @@ def consultant_booking(request):
     }
 
     return render(request, "pro_features/consultant_booking.html", context)
+
+
+
+

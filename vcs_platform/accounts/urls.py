@@ -61,6 +61,7 @@ urlpatterns = [
     path('free/', views.free_plan, name='free_plan'),
     path('pro/', views.pro_plan, name='pro_plan'),
     path('profile/',views.profile,name='profile'),
+     path('update-profile/', views.update_profile, name='update_profile'),
 
     #path('payment/', views.payment_page, name='payment'),
     path('payment/success/<str:plan_type>/', views.payment_success, name='payment_success'),
@@ -74,7 +75,10 @@ urlpatterns = [
     path('schedule-meeting/<int:application_id>/', views.schedule_meeting, name='schedule_meeting'),
     path('edit-meeting/<int:meeting_id>/', views.edit_meeting, name='edit_meeting'),
    
- 
+ path('support/', views.support, name='support'),
+path('delivery/', views.delivery, name='delivery'),
+path('terms/', views.terms, name='terms'),
+path('privacy/', views.privacy, name='privacy'),
 
 
 

@@ -122,11 +122,11 @@
   <div class="container">
 
     <div class="text-center mb-5">
-      <small class="text-muted">How it Works</small>
-      <h2 class="fw-bold mt-2">
-        Easy Steps To Get Your Dream Job <br>
+      <h2 class="fw-bold mt-2">How it Works</h2>
+      <h6 class=" mt-2 text-muted">
+        Easy Steps To Get Your Dream Job 
         With Our Platform
-      </h2>
+      </h6>
     </div>
 
     <div class="row g-4">
@@ -156,10 +156,10 @@
           {% endif %}-->
 <section class="services-section py-5">
   <div class="container text-center mb-5">
-    <h2 class="fw-bold mt-2">Our Services</h2>
-    <p class="text-muted">
+    <h2 class="fw-bold ">Our Services</h2>
+    <h6 class="text-muted">
       Choose the plan that fits your career journey
-    </p>
+    </h6>
   </div>
 
   <div class="container">
@@ -285,6 +285,83 @@ function sendMessage(){
     input.value="";
 }
 
+
+</script>
+<script>
+
+const chatBody = document.getElementById("chat-body");
+
+// OPEN CHAT
+document.getElementById("chatbot-icon").onclick = function(){
+    document.getElementById("chatbot-popup").style.display="flex";
+
+    // Show welcome message ONLY once
+    if(chatBody.innerHTML.trim() === ""){
+        chatBody.innerHTML += `
+            <div class="ai-msg">👋 Hi! I'm your AI Career Assistant.<br>How can I help you today?</div>
+        `;
+    }
+}
+
+// CLOSE CHAT
+document.getElementById("close-chat").onclick = function(){
+    document.getElementById("chatbot-popup").style.display="none";
+}
+
+// SEND MESSAGE
+function cleanAIResponse(text) {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, "$1")   // remove **bold**
+        .replace(/#+/g, "")               // remove ###
+        .replace(/[\*\#\`\_]/g, "")       // remove unwanted symbols
+        .replace(/\n+/g, "<br>")          // convert new lines
+        .trim();
+}
+
+function sendMessage(){
+
+    let input = document.getElementById("user-message");
+    let message = input.value;
+
+    if(message.trim() == "") return;
+
+    // ✅ USER MESSAGE
+    chatBody.innerHTML += `
+        <div class="user-msg">${message}</div>
+    `;
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    fetch("/aichatbot/ai-chat/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({ message: message })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        // ✅ CLEAN AI RESPONSE
+        let cleanText = cleanAIResponse(data.reply);
+
+        // ✅ AI MESSAGE
+        chatBody.innerHTML += `
+            <div class="ai-msg">${cleanText}</div>
+        `;
+
+        chatBody.scrollTop = chatBody.scrollHeight;
+    })
+    .catch(err => {
+        chatBody.innerHTML += `
+            <div class="ai-msg">⚠️ Error connecting AI</div>
+        `;
+        console.log(err);
+    });
+
+    input.value = "";
+}
 
 </script>
 <!-- Styles -->
@@ -479,7 +556,7 @@ function sendMessage(){
 }
 
 .how-it-works h2 {
-    color: #1f2b5b;
+    color:black;
 }
 
 .how-card {
@@ -488,7 +565,9 @@ function sendMessage(){
     border-radius: 12px;
     transition: all 0.3s ease;
 }
-
+.how-it-works h5{
+  color: #6c757d;
+}
 .how-card:hover {
     transform: translateY(-5px);
 }
@@ -670,7 +749,7 @@ function sendMessage(){
     position:fixed;
     bottom:90px;
     right:25px;
-    width:330px;
+    width:420px;
     height:420px;
     background:white;
     border-radius:12px;
@@ -689,11 +768,36 @@ function sendMessage(){
     justify-content:space-between;
 }
 
-#chat-body{
-    flex:1;
-    padding:10px;
-    overflow-y:auto;
-    font-size:14px;
+/* Chat body layout */
+#chat-body {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* USER MESSAGE (RIGHT) */
+.user-msg {
+    align-self: flex-end;
+    background: #2563eb;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 15px 15px 0 15px;
+    max-width: 75%;
+    font-size: 14px;
+}
+
+/* AI MESSAGE (LEFT) */
+.ai-msg {
+    align-self: flex-start;
+    background: #f1f5f9;
+    color: #111;
+    padding: 8px 12px;
+    border-radius: 15px 15px 15px 0;
+    max-width: 75%;
+    font-size: 14px;
 }
 
 .chat-input{

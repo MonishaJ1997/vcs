@@ -13,21 +13,39 @@
     <!-- Flash Messages -->
     {% if messages %}
     <div class="mb-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm d-flex align-items-center py-2" role="alert">
+     {% for message in messages %}
+<div class="alert 
+    {% if message.tags == 'error' %}alert-danger
+    {% else %}alert-{{ message.tags }}
+    {% endif %}
+    alert-dismissible fade show custom-alert" role="alert">
+
+    <div class="d-flex align-items-center w-100">
+       
+        <!-- Icon -->
+        <div class="me-2">
             {% if message.tags == 'success' %}
-                <i class="bi bi-check-circle-fill me-2"></i>
+                <i class="bi bi-check-circle-fill"></i>
             {% elif message.tags == 'error' or message.tags == 'danger' %}
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <i class="bi bi-exclamation-triangle-fill"></i>
             {% elif message.tags == 'warning' %}
-                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                <i class="bi bi-exclamation-circle-fill"></i>
             {% elif message.tags == 'info' %}
-                <i class="bi bi-info-circle-fill me-2"></i>
+                <i class="bi bi-info-circle-fill"></i>
             {% endif %}
-            <span>{{ message }}</span>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
-        {% endfor %}
+
+        <!-- Message -->
+        <div class="flex-grow-1">
+            {{ message }}
+        </div>
+
+        <!-- Close Button -->
+        <button type="button" class="btn-close ms-2" data-bs-dismiss="alert"></button>
+
+    </div>
+</div>
+{% endfor %}
     </div>
     {% endif %}
 
@@ -65,15 +83,38 @@
 
     <!-- AI Suggestions Card -->
     {% if suggestions %}
-    <div class="card shadow-sm p-4 mb-4">
-        <h5 class="fw-bold mb-3">AI Suggestions</h5>
-        <p class="mb-0">{{ suggestions|linebreaks }}</p>
-    </div>
-    {% endif %}
+<div class="card shadow-sm p-4 mb-4 position-relative" id="suggestionBox">
+
+    <!-- ❌ Close Button (ADDED) -->
+    <button 
+        type="button" 
+        class="btn-close position-absolute top-0 end-0 m-3"
+        onclick="document.getElementById('suggestionBox').style.display='none'">
+    </button>
+
+    <h5 class="fw-bold mb-3">AI Suggestions</h5>
+
+    <pre style="white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+{{ suggestions|safe|linebreaksbr }}
+    </pre>
+
+</div>
+{% endif %}
 
 </div>
 
 <!-- Extra Bottom Padding -->
 <div style="padding-bottom: 40px;"></div>
+<style>
+/* Flash messages alignment */
+.custom-alert {
+    padding: 10px 15px;
+}
 
+.custom-alert .btn-close {
+    position: static !important;
+    transform: none !important;
+    margin: 0;
+}
+</style>
 {% endblock %}

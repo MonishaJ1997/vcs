@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="help-container">
+  <h5>Terms & Conditions</h5>
+  <p>By using our platform, you agree to the following terms:</p>
+
+  <ul>
+    <li> Provide valid information</li>
+    <li>Do not misuse services</li>
+    <li> Follow platform guidelines</li>
+  </ul>
+</div>
+
+<style>
+.help-container {
+  max-width: 850px;
+  margin: 100px auto 60px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.help-container h5 {
+  color: black;
+  font-weight: 700;
+}
+
+.help-container p {
+  color: #6c757d;
+}
+
+.help-container ul li {
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+</style>
+
+{% endblock %}

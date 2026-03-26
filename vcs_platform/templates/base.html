@@ -15,7 +15,9 @@
 
     <!-- Custom Styles -->
     <style>
-        body { font-family: 'Poppins', sans-serif; }
+        body { font-family: 'Poppins', sans-serif; 
+      cursor: pointer;}
+        
 
         /* Navbar */
         .navbar { background-color: #2563eb; }
@@ -142,56 +144,53 @@
         <p class="footer-text">
           Professional recruitment solutions connecting candidates with top employers across industries.
         </p>
-        <div class="footer-social">
-          <i class="bi bi-facebook"></i>
-          <i class="bi bi-twitter"></i>
-          <i class="bi bi-instagram"></i>
-        </div>
+      <div class="footer-social">
+    <a href="https://www.facebook.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+        <i class="bi bi-facebook"></i>
+    </a>
+    <a href="https://twitter.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+        <i class="bi bi-twitter"></i>
+    </a>
+    <a href="https://www.instagram.com/" target="_blank" rel="noopener" style="color: inherit; text-decoration: none;">
+        <i class="bi bi-instagram"></i>
+    </a>
+</div>
       </div>
 
       <!-- COMPANY -->
-      <div class="col-lg-2 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <h6>Company</h6>
-        <ul>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Features</a></li>
-          <li><a href="#">Works</a></li>
-          <li><a href="#">Career</a></li>
-        </ul>
+<ul>
+  <li><a href="{% url 'dashboard' %}">Home</a></li>
+  <li><a href="{% url 'jobs:job_list' %}">Jobs</a></li>
+  <li><a href="{% url 'services' %}">Services</a></li>
+</ul>
       </div>
 
       <!-- HELP -->
-      <div class="col-lg-2 col-md-6">
-        <h6>Help</h6>
-        <ul>
-          <li><a href="#">Customer Support</a></li>
-          <li><a href="#">Delivery Details</a></li>
-          <li><a href="#">Terms & Conditions</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-        </ul>
-      </div>
+      <div class="col-lg-3 col-md-6">
+  <h6>Help</h6>
+  <ul>
+    <li><a href="{% url 'support' %}">Customer Support</a></li>
+    
+    <li><a href="{% url 'terms' %}">Terms & Conditions</a></li>
+    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+  </ul>
+</div>
 
       <!-- CANDIDATES -->
-      <div class="col-lg-2 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <h6>For Candidates</h6>
         <ul>
-          <li><a href="#">Browse Jobs</a></li>
-          <li><a href="#">Browse Employers</a></li>
-          <li><a href="#">Candidate Dashboard</a></li>
-          <li><a href="#">Saved Jobs</a></li>
+          <li><a href="{% url 'jobs:job_list' %}">Browse Jobs</a></li>
+          <li><a href="{% url 'jobs:job_list' %}">Browse Employers</a></li>
+          <li><a href="{% url 'profile' %}">Candidate Dashboard</a></li>
+          <li><a href="{% url 'jobs:my_jobs' %}">Saved Jobs</a></li>
         </ul>
       </div>
 
       <!-- EMPLOYERS -->
-      <div class="col-lg-3 col-md-6">
-        <h6>For Employers</h6>
-        <ul>
-          <li><a href="#">Post Job</a></li>
-          <li><a href="#">Browse Candidates</a></li>
-          <li><a href="#">Employer Dashboard</a></li>
-          <li><a href="#">Applications</a></li>
-        </ul>
-      </div>
+
 
     </div>
   </div>

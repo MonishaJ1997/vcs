@@ -78,6 +78,71 @@
     </div>
 </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.querySelector("form");
+
+    form.addEventListener("submit", function (e) {
+
+        let isValid = true;
+
+        // NAME VALIDATION
+        const nameInput = document.querySelector("input[name='name']");
+        if (nameInput) {
+            const nameValue = nameInput.value.trim();
+            const nameRegex = /^[A-Za-z ]+$/;
+
+            if (!nameRegex.test(nameValue)) {
+                showError(nameInput, "Name should contain only letters");
+                isValid = false;
+            } else {
+                removeError(nameInput);
+            }
+        }
+
+        // EMAIL VALIDATION
+        const emailInput = document.querySelector("input[name='email']");     
+        if (emailInput) {
+            const emailValue = emailInput.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!emailRegex.test(emailValue)) {
+                showError(emailInput, "Enter a valid email address");
+                isValid = false;
+            } else {
+                removeError(emailInput);
+            }
+        }
+
+        if (!isValid) {
+            e.preventDefault(); // stop form submit
+        }
+
+    });
+
+    // Show error
+    function showError(input, message) {
+        removeError(input);
+
+        const error = document.createElement("div");
+        error.className = "text-danger small mt-1";
+        error.innerText = message;
+
+        input.parentNode.appendChild(error);
+        input.style.border = "1px solid red";
+    }
+
+    // Remove error
+    function removeError(input) {
+        input.style.border = "1px solid #ddd";
+
+        const oldError = input.parentNode.querySelector(".text-danger");
+        if (oldError) oldError.remove();
+    }
+
+});
+</script>
 <style>
 
 /* ===============================
@@ -129,7 +194,27 @@
     border-radius:8px;
     font-size:14px;
 }
+/* Make all inputs full width */
+.job-apply-page input,
+.job-apply-page select,
+.job-apply-page textarea {
+    width: 100% !important;
+    height: 48px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+}
 
+/* Fix email specifically */
+.job-apply-page input[type="email"] {
+    width: 100% !important;
+}
+
+/* Better spacing */
+.job-apply-page .mb-3 {
+    margin-bottom: 18px !important;
+}
 /* Mobile */
 @media (max-width:576px){
 

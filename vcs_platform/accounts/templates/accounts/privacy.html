@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="help-container">
+  <h5>Privacy Policy</h5>
+  <p>Your data is safe and secure with us.</p>
+
+  <ul>
+    <li>🔒 We do not share personal data</li>
+    <li>🛡 Secure authentication system</li>
+    <li>🔐 Encrypted data storage</li>
+  </ul>
+</div>
+
+<style>
+.help-container {
+  max-width: 850px;
+  margin: 100px auto 60px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.help-container h5 {
+  color: black;
+  font-weight: 700;
+}
+
+.help-container p {
+  color: #6c757d;
+}
+
+.help-container ul li {
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+ list-style: none;
+}
+</style>
+
+{% endblock %}
