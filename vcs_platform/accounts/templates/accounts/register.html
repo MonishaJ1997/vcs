@@ -25,6 +25,7 @@
       <div class="form-group">
         <label>Password <span class="required">*</span></label>
         {{ form.password }}
+     
         <small class="error">{{ form.password.errors }}</small>
       </div>
 
@@ -51,20 +52,28 @@
 
 <style>
 
-.error {
-  color: red;
-  font-size: 13px;
-}
 
 /* (keep your previous styles) */
+.hint {
+  display: block;
+  color: #6c757d;
+  font-size: 12px;
+  margin-top: 4px;
+}
 
+.error {
+  display: block;
+  color: #d63031;
+  font-size: 13px;
+  margin-top: 4px;
+}
 
 .auth-section {
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f5f7fa;
+  
 }
 
 .auth-card {
@@ -72,7 +81,7 @@
   max-width: 400px;
   padding: 30px;
   border-radius: 16px;
-  background: #fff;
+  background: #dad9d9;
   box-shadow: 0 8px 25px rgba(0,0,0,0.08);
   margin-top: 100px;
 }

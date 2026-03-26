@@ -18,7 +18,7 @@ class RegistrationForm(forms.ModelForm):
             'email': forms.EmailInput(attrs={'placeholder': 'Email'}),
         }
 
-    # ✅ Name validation (only letters)
+    # ✅ Name validation
     def clean_username(self):
         username = self.cleaned_data['username']
         if not re.match(r'^[A-Za-z ]+$', username):
@@ -32,6 +32,20 @@ class RegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Email already exists")
         return email
 
+    # ✅ PASSWORD VALIDATION (FIXED INSIDE CLASS)
+    def clean_password(self):
+        password = self.cleaned_data.get('password')
+
+        password_regex = r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&]).{7,}$'
+
+        if not re.match(password_regex, password):
+            raise forms.ValidationError(
+                "Password must be at least 7 characters and include a letter, number, and special character"
+            )
+
+        return password
+
+    # ✅ SAVE METHOD (FIXED INDENTATION)
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data['password'])
@@ -39,8 +53,6 @@ class RegistrationForm(forms.ModelForm):
             user.save()
             Profile.objects.create(user=user)
         return user
-
-
 
 
 from django import forms
